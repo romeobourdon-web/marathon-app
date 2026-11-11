@@ -1,5 +1,6 @@
-// Le « modèle de données » de l'app. Quand on branchera Supabase/Strava,
-// les tables reprendront ces formes.
+// Types du plan : ce qui est prévu (phases, séances) et sa liaison avec le réalisé.
+
+import type { CompletedRun, JournalEntry } from "@/db/types";
 
 export type SessionType =
   | "ef"
@@ -37,31 +38,10 @@ export interface PlannedSession {
   targetHr: Range; // bpm
 }
 
-export interface CompletedRun {
-  distanceKm: number;
-  durationSec: number;
-  avgPace: number; // secondes/km (sur les blocs pour les séances de qualité)
-  avgHr: number;
-}
-
-export interface JournalEntry {
-  feeling: 1 | 2 | 3 | 4 | 5;
-  rpe: number; // 1 à 10
-  note: string;
-}
-
 export type SessionStatus = "done" | "skipped" | "today" | "upcoming";
 
 export interface Session extends PlannedSession {
   status: SessionStatus;
   actual?: CompletedRun;
   journal?: JournalEntry;
-}
-
-export interface Race {
-  name: string;
-  date: string;
-  distanceKm: number;
-  targetTimeSec: number;
-  targetPace: number;
 }

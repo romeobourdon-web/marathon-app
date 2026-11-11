@@ -2,7 +2,8 @@
 // Tout est calculé à partir de quelques tableaux : facile à ajuster.
 
 import { addDays } from "@/lib/dates";
-import type { Phase, PhaseId, PlannedSession, Race, Range, SessionType } from "./types";
+import type { Race } from "@/db/types";
+import type { Phase, PhaseId, PlannedSession, Range, SessionType } from "@/planner/types";
 
 export const RACE: Race = {
   name: "Marathon du Lac d'Annecy",

@@ -2,7 +2,8 @@
 // un « réalisé » et une entrée de journal. Le hasard est « graine fixe »
 // (même séance → même résultat à chaque rechargement).
 
-import type { CompletedRun, JournalEntry, PlannedSession } from "./types";
+import type { CompletedRun, JournalEntry } from "@/db/types";
+import type { PlannedSession } from "@/planner/types";
 
 function seededRandom(seed: string): () => number {
   let h = 2166136261;

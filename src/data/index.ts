@@ -4,10 +4,11 @@
 import { daysBetween } from "@/lib/dates";
 import { mockActivity } from "./mock-activity";
 import { PHASES, PLANNED_SESSIONS, RACE, TOTAL_WEEKS, weekStart } from "./plan";
-import type { Phase, Session } from "./types";
+import type { Phase, Session } from "@/planner/types";
 
 export { PHASES, RACE, TOTAL_WEEKS, TYPE_LABELS, ZONES } from "./plan";
-export type * from "./types";
+export type * from "@/db/types";
+export type * from "@/planner/types";
 
 export function getSessions(today: string): Session[] {
   return PLANNED_SESSIONS.map((s) => {
