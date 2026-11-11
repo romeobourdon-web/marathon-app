@@ -21,3 +21,8 @@ export interface Race {
   targetTimeSec: number;
   targetPace: number;
 }
+
+/** Ce que la source d'activités renvoie pour une séance passée. */
+export type ActivityResult =
+  | { skipped: true }
+  | { skipped: false; actual: CompletedRun; journal: JournalEntry };

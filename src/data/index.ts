@@ -1,111 +1,44 @@
-// Point d'entrée unique des données. Les pages n'appellent que ces fonctions :
-// le jour où l'on branche Supabase/Strava, seul ce fichier change.
+// Façade temporaire : délègue à planner/ et engine/. Supprimée à l'étape suivante
+// (les écrans passeront par db/repository).
 
-import { daysBetween } from "@/lib/dates";
 import { mockActivity } from "@/db/seed/mock/activity";
 import { PLAN_START, RACE, ZONES } from "@/db/seed/reference";
-import { PHASES, TOTAL_WEEKS, buildPlan, weekStart as planWeekStart } from "@/planner/plan";
-import type { Phase, Session } from "@/planner/types";
+import * as calendar from "@/planner/calendar";
+import { buildPlan } from "@/planner/plan";
+import { linkSessions, nextSession } from "@/planner/sessions";
+import { volumeTrend, weekSummary, type VolumePoint, type WeekSummary } from "@/planner/summary";
+import type { Session } from "@/planner/types";
 
 export { RACE, ZONES } from "@/db/seed/reference";
-export { PHASES, TOTAL_WEEKS, TYPE_LABELS } from "@/planner/plan";
-
-const PLANNED_SESSIONS = buildPlan({ start: PLAN_START, raceName: RACE.name, zones: ZONES });
-const weekStart = (week: number) => planWeekStart(PLAN_START, week);
+export { PHASES, TOTAL_WEEKS, TYPE_LABELS, phaseForWeek } from "@/planner/plan";
+export type { WeekStatus } from "@/engine/week-status";
+export type { VolumePoint, WeekSummary } from "@/planner/summary";
 export type * from "@/db/types";
 export type * from "@/planner/types";
 
+const PLANNED_SESSIONS = buildPlan({ start: PLAN_START, raceName: RACE.name, zones: ZONES });
+
 export function getSessions(today: string): Session[] {
-  return PLANNED_SESSIONS.map((s) => {
-    if (s.date > today) return { ...s, status: "upcoming" };
-    if (s.date === today) return { ...s, status: "today" };
-    const result = mockActivity(s);
-    if (result.skipped) return { ...s, status: "skipped" };
-    return { ...s, status: "done", actual: result.actual, journal: result.journal };
-  });
+  return linkSessions(PLANNED_SESSIONS, today, mockActivity);
 }
 
-/** Numéro de la semaine du plan contenant `today` (borné entre 1 et TOTAL_WEEKS). */
 export function currentWeek(today: string): number {
-  const w = Math.floor(daysBetween(weekStart(1), today) / 7) + 1;
-  return Math.min(Math.max(w, 1), TOTAL_WEEKS);
-}
-
-export function phaseForWeek(week: number): Phase {
-  return PHASES.find((p) => week >= p.weeks.min && week <= p.weeks.max)!;
-}
-
-export type WeekStatus = "avance" | "ok" | "retard";
-
-export interface WeekSummary {
-  week: number;
-  start: string;
-  phase: Phase;
-  plannedKm: number;
-  doneKm: number;
-  plannedToDateKm: number; // ce qui était prévu jusqu'à hier inclus
-  sessions: Session[];
-  doneCount: number;
-  remainingCount: number;
-  status: WeekStatus;
+  return calendar.currentWeek(PLAN_START, today);
 }
 
 export function getWeekSummary(week: number, today: string): WeekSummary {
-  const sessions = getSessions(today).filter((s) => s.week === week);
-  const plannedKm = sum(sessions.map((s) => s.distanceKm));
-  const doneKm = sum(sessions.map((s) => s.actual?.distanceKm ?? 0));
-  const plannedToDateKm = sum(sessions.filter((s) => s.date < today).map((s) => s.distanceKm));
-
-  const ratio = plannedToDateKm === 0 ? 1 : doneKm / plannedToDateKm;
-  const status: WeekStatus = ratio >= 1.05 ? "avance" : ratio >= 0.9 ? "ok" : "retard";
-
-  return {
-    week,
-    start: weekStart(week),
-    phase: phaseForWeek(week),
-    plannedKm,
-    doneKm,
-    plannedToDateKm,
-    sessions,
-    doneCount: sessions.filter((s) => s.status === "done").length,
-    remainingCount: sessions.filter((s) => s.status === "today" || s.status === "upcoming").length,
-    status,
-  };
+  return weekSummary(getSessions(today), PLAN_START, week, today);
 }
 
-export interface VolumePoint {
-  week: number;
-  plannedKm: number;
-  doneKm: number | null; // null = semaine pas encore commencée
-  isCurrent: boolean;
-}
-
-/** Volume hebdo prévu vs réalisé, des semaines passées jusqu'à quelques semaines à venir. */
 export function getVolumeTrend(today: string, past = 7, ahead = 3): VolumePoint[] {
-  const sessions = getSessions(today);
-  const cw = currentWeek(today);
-  const points: VolumePoint[] = [];
-  for (let w = Math.max(1, cw - past); w <= Math.min(TOTAL_WEEKS, cw + ahead); w++) {
-    const ws = sessions.filter((s) => s.week === w);
-    points.push({
-      week: w,
-      plannedKm: sum(ws.map((s) => s.distanceKm)),
-      doneKm: w > cw ? null : sum(ws.map((s) => s.actual?.distanceKm ?? 0)),
-      isCurrent: w === cw,
-    });
-  }
-  return points;
+  return volumeTrend(getSessions(today), PLAN_START, today, past, ahead);
 }
 
-/** La séance prévue aujourd'hui, sinon la prochaine. */
 export function getNextSession(today: string): Session | undefined {
-  return getSessions(today).find((s) => s.status === "today" || s.status === "upcoming");
+  return nextSession(getSessions(today));
 }
 
 export function daysToRace(today: string): number {
-  return daysBetween(today, RACE.date);
+  return calendar.daysToRace(today, RACE.date);
 }
 
-function sum(values: number[]): number {
-  return Math.round(values.reduce((a, b) => a + b, 0) * 10) / 10;
-}

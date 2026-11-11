@@ -58,8 +58,9 @@ const WEEKS: [number, number, boolean][] = [
   [48, 22, false], [38, 16, false], [57, 42.2, false],
 ];
 
-function phaseOf(week: number): PhaseId {
-  return PHASES.find((p) => week >= p.weeks.min && week <= p.weeks.max)!.id;
+/** Phase contenant la semaine `week`. */
+export function phaseForWeek(week: number): Phase {
+  return PHASES.find((p) => week >= p.weeks.min && week <= p.weeks.max)!;
 }
 
 type Workout = { type: SessionType; title: string; details: string };
@@ -139,7 +140,7 @@ export function buildPlan(params: PlanParams): PlannedSession[] {
 
   WEEKS.forEach(([volume, longKm, light], i) => {
     const week = i + 1;
-    const phase = phaseOf(week);
+    const phase = phaseForWeek(week).id;
 
     if (week === WEEKS.length) {
       // Semaine de course

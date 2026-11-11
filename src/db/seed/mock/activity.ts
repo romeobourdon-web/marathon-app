@@ -2,7 +2,7 @@
 // un « réalisé » et une entrée de journal. Le hasard est « graine fixe »
 // (même séance → même résultat à chaque rechargement).
 
-import type { CompletedRun, JournalEntry } from "@/db/types";
+import type { ActivityResult, CompletedRun, JournalEntry } from "@/db/types";
 import type { PlannedSession } from "@/planner/types";
 
 function seededRandom(seed: string): () => number {
@@ -67,9 +67,7 @@ const NOTES: Record<"tooFast" | "good" | "hard" | "short", string[]> = {
 
 const pick = (rand: () => number, list: string[]) => list[Math.floor(rand() * list.length)];
 
-export function mockActivity(
-  s: PlannedSession,
-): { skipped: true } | { skipped: false; actual: CompletedRun; journal: JournalEntry } {
+export function mockActivity(s: PlannedSession): ActivityResult {
   const rand = seededRandom(s.id);
 
   if (s.type !== "course" && rand() < 0.07) return { skipped: true };
