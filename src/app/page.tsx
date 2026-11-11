@@ -7,7 +7,9 @@ import { TOTAL_WEEKS } from "@/planner/plan";
 import { nextSession } from "@/planner/sessions";
 import { volumeTrend, weekSummary, type WeekSummary } from "@/planner/summary";
 import type { Session } from "@/planner/types";
-import { todayInParis, addDays } from "@/lib/dates";
+import { easyRunFocus } from "@/engine/endurance";
+import { cappedPct, planProgressPct } from "@/engine/progress";
+import { todayInParis, addDays, splitWeeksDays } from "@/lib/dates";
 import { formatDayLong, formatDayShort, formatDuration, formatKm, formatPace, formatPaceRange } from "@/lib/format";
 import { Card, CardTitle, Stat, TypeBadge, WeekStatusPill } from "@/components/ui";
 import { VolumeChart } from "@/components/volume-chart";
@@ -49,7 +51,8 @@ async function Dashboard() {
 function Countdown({ today, week, summary, className }: { today: string; week: number; summary: WeekSummary; className?: string }) {
   const RACE = getRace();
   const days = daysToRace(today, RACE.date);
-  const progress = Math.round((week / TOTAL_WEEKS) * 100);
+  const remaining = splitWeeksDays(days);
+  const progress = planProgressPct(week, TOTAL_WEEKS);
 
   return (
     <section
@@ -67,7 +70,7 @@ function Countdown({ today, week, summary, className }: { today: string; week: n
           <div className="mt-1 font-display text-[5.5rem] leading-[0.9] font-bold tracking-tight tabular sm:text-[8rem]">
             J-{days}
           </div>
-          <p className="mt-2 font-semibold">soit {Math.floor(days / 7)} semaines et {days % 7} jours</p>
+          <p className="mt-2 font-semibold">soit {remaining.weeks} semaines et {remaining.days} jours</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:w-[24rem]">
@@ -98,8 +101,8 @@ function Countdown({ today, week, summary, className }: { today: string; week: n
 }
 
 function ThisWeek({ summary, today, className }: { summary: WeekSummary; today: string; className?: string }) {
-  const pct = Math.min(100, (summary.doneKm / summary.plannedKm) * 100);
-  const toDatePct = Math.min(100, (summary.plannedToDateKm / summary.plannedKm) * 100);
+  const pct = cappedPct(summary.doneKm, summary.plannedKm);
+  const toDatePct = cappedPct(summary.plannedToDateKm, summary.plannedKm);
 
   return (
     <Card className={className}>
@@ -205,13 +208,7 @@ function NextSession({ session, today, className }: { session?: Session; today: 
 
 // Point de travail de Roméo : ne pas courir l'endurance trop vite.
 function EnduranceInsight({ sessions, today, className }: { sessions: Session[]; today: string; className?: string }) {
-  const since = addDays(today, -14);
-  const easy = sessions.filter((s) => s.status === "done" && (s.type === "ef" || s.type === "recup") && s.date >= since);
-  const gap = easy.length
-    ? Math.round(easy.reduce((acc, s) => acc + (s.actual!.avgPace - s.targetPace.min), 0) / easy.length)
-    : 0;
-  const hrOver = easy.filter((s) => s.actual!.avgHr > s.targetHr.max).length;
-  const tooFast = gap < 0;
+  const { count, paceGap: gap, tooFast, hrOverCount: hrOver, hrZoneMax } = easyRunFocus(sessions, today);
 
   return (
     <Card className={className}>
@@ -226,8 +223,8 @@ function EnduranceInsight({ sessions, today, className }: { sessions: Session[];
         {tooFast ? "plus vite que la zone EF" : "dans la zone EF"}
       </p>
       <div className="mt-4 rounded-2xl bg-surface-2 p-3.5 text-sm text-ink-2">
-        <span className="font-bold text-ink tabular">{hrOver}/{easy.length}</span> footings avec une FC moyenne au-dessus de{" "}
-        {easy[0]?.targetHr.max ?? 150} bpm.{" "}
+        <span className="font-bold text-ink tabular">{hrOver}/{count}</span> footings avec une FC moyenne au-dessus de{" "}
+        {hrZoneMax ?? 150} bpm.{" "}
         {tooFast && "Ralentis : l'endurance se construit à allure facile."}
       </div>
     </Card>

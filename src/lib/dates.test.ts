@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, daysBetween, todayInParis } from "@/lib/dates";
+import { addDays, daysBetween, splitWeeksDays, todayInParis } from "@/lib/dates";
 
 describe("dates", () => {
   it("addDays traverse les mois et les années", () => {
@@ -14,5 +14,11 @@ describe("dates", () => {
 
   it("todayInParis utilise le fuseau de Paris", () => {
     expect(todayInParis(new Date("2026-11-11T23:30:00Z"))).toBe("2026-11-12");
+  });
+
+  it("splitWeeksDays découpe en semaines et jours", () => {
+    expect(splitWeeksDays(158)).toEqual({ weeks: 22, days: 4 });
+    expect(splitWeeksDays(7)).toEqual({ weeks: 1, days: 0 });
+    expect(splitWeeksDays(0)).toEqual({ weeks: 0, days: 0 });
   });
 });

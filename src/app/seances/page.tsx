@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { getSessions } from "@/db/repository";
+import { paceGap } from "@/engine/pace";
 import type { Session } from "@/planner/types";
 import { todayInParis } from "@/lib/dates";
 import { formatDayShort, formatKm, formatPace, formatPaceRange } from "@/lib/format";
@@ -32,14 +33,6 @@ async function SessionList() {
   );
 }
 
-/** Écart d'allure par rapport à la fourchette visée (négatif = trop vite). */
-function paceGap(s: Session): number {
-  const pace = s.actual!.avgPace;
-  if (pace < s.targetPace.min) return pace - s.targetPace.min;
-  if (pace > s.targetPace.max) return pace - s.targetPace.max;
-  return 0;
-}
-
 function SessionRow({ session: s }: { session: Session }) {
   return (
     <Card className="!p-4 sm:!p-5">
@@ -57,7 +50,7 @@ function SessionRow({ session: s }: { session: Session }) {
         ) : (
           <div className="grid grid-cols-3 gap-4 sm:w-[28rem]">
             <Compare label="Distance" planned={`${formatKm(s.distanceKm)} km`} actual={`${formatKm(s.actual!.distanceKm)} km`} />
-            <Compare label="Allure /km" planned={formatPaceRange(s.targetPace)} actual={formatPace(s.actual!.avgPace)} gap={paceGap(s)} />
+            <Compare label="Allure /km" planned={formatPaceRange(s.targetPace)} actual={formatPace(s.actual!.avgPace)} gap={paceGap(s.actual!.avgPace, s.targetPace)} />
             <Compare
               label="FC moy."
               planned={`${s.targetHr.min}–${s.targetHr.max}`}

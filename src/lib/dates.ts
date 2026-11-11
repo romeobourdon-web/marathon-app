@@ -25,3 +25,8 @@ export function todayInParis(now: Date = new Date()): string {
     day: "2-digit",
   }).format(now);
 }
+
+/** 45 → { weeks: 6, days: 3 } */
+export function splitWeeksDays(totalDays: number): { weeks: number; days: number } {
+  return { weeks: Math.floor(totalDays / 7), days: totalDays % 7 };
+}
