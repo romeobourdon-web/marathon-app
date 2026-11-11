@@ -1,7 +1,7 @@
 // Mini-graphe du volume hebdomadaire : barre grise = prévu, barre corail = réalisé.
 // Survol (ou tap sur mobile) d'une colonne → info-bulle avec les valeurs.
 
-import type { VolumePoint } from "@/data";
+import type { VolumePoint } from "@/planner/summary";
 import { formatKm } from "@/lib/format";
 
 export function VolumeChart({ points }: { points: VolumePoint[] }) {

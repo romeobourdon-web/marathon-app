@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { getSessions, type Session } from "@/data";
+import { getSessions } from "@/db/repository";
+import type { Session } from "@/planner/types";
 import { todayInParis } from "@/lib/dates";
 import { formatDayShort, formatKm, formatPace, formatPaceRange } from "@/lib/format";
 import { Card, PageHeader, TypeBadge } from "@/components/ui";

@@ -1,18 +1,12 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import Link from "next/link";
-import {
-  RACE,
-  TOTAL_WEEKS,
-  currentWeek,
-  daysToRace,
-  getNextSession,
-  getSessions,
-  getVolumeTrend,
-  getWeekSummary,
-  type Session,
-  type WeekSummary,
-} from "@/data";
+import { getPlanStart, getRace, getSessions } from "@/db/repository";
+import { currentWeek, daysToRace } from "@/planner/calendar";
+import { TOTAL_WEEKS } from "@/planner/plan";
+import { nextSession } from "@/planner/sessions";
+import { volumeTrend, weekSummary, type WeekSummary } from "@/planner/summary";
+import type { Session } from "@/planner/types";
 import { todayInParis, addDays } from "@/lib/dates";
 import { formatDayLong, formatDayShort, formatDuration, formatKm, formatPace, formatPaceRange } from "@/lib/format";
 import { Card, CardTitle, Stat, TypeBadge, WeekStatusPill } from "@/components/ui";
@@ -31,11 +25,12 @@ export default function DashboardPage() {
 async function Dashboard() {
   await connection();
   const today = todayInParis();
-  const week = currentWeek(today);
-  const summary = getWeekSummary(week, today);
-  const next = getNextSession(today);
-  const trend = getVolumeTrend(today);
+  const planStart = getPlanStart();
   const sessions = getSessions(today);
+  const week = currentWeek(planStart, today);
+  const summary = weekSummary(sessions, planStart, week, today);
+  const next = nextSession(sessions);
+  const trend = volumeTrend(sessions, planStart, today);
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:gap-5">
@@ -52,7 +47,8 @@ async function Dashboard() {
 }
 
 function Countdown({ today, week, summary, className }: { today: string; week: number; summary: WeekSummary; className?: string }) {
-  const days = daysToRace(today);
+  const RACE = getRace();
+  const days = daysToRace(today, RACE.date);
   const progress = Math.round((week / TOTAL_WEEKS) * 100);
 
   return (

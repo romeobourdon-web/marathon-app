@@ -1,7 +1,9 @@
 // Briques visuelles partagées par toutes les pages.
 
 import type { ReactNode } from "react";
-import { TYPE_LABELS, type SessionType, type WeekStatus } from "@/data";
+import type { WeekStatus } from "@/engine/week-status";
+import { TYPE_LABELS } from "@/planner/plan";
+import type { SessionType } from "@/planner/types";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (

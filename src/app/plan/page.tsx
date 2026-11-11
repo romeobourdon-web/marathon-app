@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { PHASES, currentWeek, getWeekSummary, TOTAL_WEEKS } from "@/data";
+import { getPlanStart, getSessions } from "@/db/repository";
+import { currentWeek } from "@/planner/calendar";
+import { PHASES, TOTAL_WEEKS } from "@/planner/plan";
+import { weekSummary } from "@/planner/summary";
 import { addDays, todayInParis } from "@/lib/dates";
 import { formatDayShort, formatKm, formatPaceRange } from "@/lib/format";
 import { Card, PageHeader, TypeBadge } from "@/components/ui";
@@ -19,7 +22,9 @@ export default function PlanPage() {
 async function Plan() {
   await connection();
   const today = todayInParis();
-  const cw = currentWeek(today);
+  const planStart = getPlanStart();
+  const sessions = getSessions(today);
+  const cw = currentWeek(planStart, today);
 
   return (
     <div className="space-y-8">
@@ -37,7 +42,7 @@ async function Plan() {
 
           <div className="grid gap-3 lg:grid-cols-2">
             {Array.from({ length: phase.weeks.max - phase.weeks.min + 1 }, (_, k) => {
-              const w = getWeekSummary(phase.weeks.min + k, today);
+              const w = weekSummary(sessions, planStart, phase.weeks.min + k, today);
               const isCurrent = w.week === cw;
               return (
                 <Card key={w.week} className={isCurrent ? "ring-2 ring-accent" : ""}>
