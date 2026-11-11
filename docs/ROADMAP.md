@@ -11,14 +11,14 @@ Marathon : Annecy, avril 2027 (date à confirmer). Départ à l'EPFL : 16 févri
 ## Phase 0 — Cadrage (semaine du 11 nov.)
 - [x] Git : commit de l'existant, tag `v0-prototype`, repo GitHub privé
 - [x] `docs/` + `CLAUDE.md` ajoutés au repo
-- [ ] Audit du code existant par Claude Code (mode plan) et décision garder/supprimer
+- [x] Audit du code existant par Claude Code (mode plan) et décision garder/supprimer
 - [ ] Projet Claude QG configuré (instructions + docs)
 - [ ] Benchmark : apps concurrentes, méthodes d'entraînement, design
 - [ ] Direction design précisée (`DESIGN.md`)
 
 ## Phase 1 — Fondations (fin nov.)
-- [ ] Restructuration selon ARCHITECTURE.md
-- [ ] `src/engine/` créé dès maintenant : calculs sortis de l'UI + tests (vitest)
+- [x] Restructuration selon ARCHITECTURE.md
+- [x] `src/engine/` créé dès maintenant : calculs sortis de l'UI + tests (vitest)
 - [ ] Supabase local + schéma V1 + données fictives
 - [ ] Connecteur Garmin (ou Strava en transition) : import des vraies activités
 - [ ] Design system de base (couleurs, typo, composants)
