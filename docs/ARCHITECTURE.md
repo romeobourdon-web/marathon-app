@@ -16,29 +16,38 @@ L'ingénieur et le coach **ne sont pas des conversations Claude** : ce sont des 
 ```
 Montre Garmin
    │
-connectors/  ── récupère activités, séries temporelles, bien-être (VFC, sommeil, FC repos)
+src/connectors/  ── récupère activités, séries temporelles, bien-être (VFC, sommeil, FC repos) (phase 1)
    │
-db/ (Supabase · Postgres)
+src/db/ (Supabase · Postgres) ── types, accès aux données (repository), seed
    │
-engine/      ── « l'ingénieur » : calcule les métriques (code pur, testé)
+src/engine/      ── « l'ingénieur » : calcule les métriques (code pur, testé)
    │
-planner/     ── plan prévu (phases → semaines → séances) + règles d'adaptation
+src/planner/     ── génère le plan (phases → semaines → séances), liaison prévu↔réalisé, règles d'adaptation
    │
-coach/       ── « le coach » : API Claude, lit les données via des outils, explique, propose (phase 3)
+src/coach/       ── « le coach » : API Claude, lit les données via des outils, explique, propose (phase 3)
    │
-app/ + components/ ── interface (PWA mobile d'abord)
+src/app/ + src/components/ ── interface (PWA mobile d'abord)
 ```
 
+Tout le code applicatif est sous `src/` (alias d'import `@/*` → `src/*`). Les migrations SQL sont à la racine, dans `supabase/`.
+Un dossier n'est créé que lorsqu'il reçoit du code (pas de dossier vide).
 ## 3. Modules
 
 | Dossier | Rôle | Règles |
 |---|---|---|
-| `connectors/` | Accès aux sources (Garmin cible, Strava possible) | Même interface `DataSource` pour toutes les sources. Aucun autre module ne connaît Garmin ou Strava. |
-| `db/` | Schéma, migrations, données fictives (`seed/`) | Migrations versionnées. |
-| `engine/` | Calculs : temps par zone, charge de séance, forme/fatigue, découplage FC/allure, prédictions | Fonctions pures, pas de réseau ni de base de données, tests obligatoires, formules référencées dans `SCIENCE.md`. |
-| `planner/` | Structure du plan, liaison prévu↔réalisé, règles d'adaptation | Le plan est une donnée, pas du texte. |
-| `coach/` | Prompts et outils du coach IA (phase 3) | Outils en lecture seule + un outil « proposer une modification », toujours validée par Roméo. |
-| `app/`, `components/` | Écrans et design system | Aucun calcul métier dans l'UI. |
+| `src/connectors/` | Accès aux sources (Garmin cible, Strava possible) — phase 1 | Même interface `DataSource` pour toutes les sources. Aucun autre module ne connaît Garmin ou Strava. |
+| `src/db/` | `types.ts` (types des données), `repository.ts` (seul point d'accès aux données pour l'UI), `seed/` | `seed/reference.ts` = données réelles de référence (course, profil athlète, zones). `seed/mock/` = données fictives, et seulement là. |
+| `supabase/` (racine) | Migrations SQL et configuration Supabase CLI — phase 1 | Migrations versionnées. |
+| `src/engine/` | Calculs : écarts, statuts, pourcentages ; plus tard temps par zone, charge, forme/fatigue, découplage FC/allure, prédictions | Fonctions pures, pas de réseau ni de base de données, tests obligatoires (`*.test.ts`, vitest). Formules référencées dans `SCIENCE.md` (à venir). |
+| `src/planner/` | Génération du plan (`buildPlan`), calendrier (semaine courante, phases), liaison prévu↔réalisé, résumés de semaine, règles d'adaptation | Fonctions pures qui reçoivent les données en argument. Le plan est une donnée, pas du texte (voir D11). |
+| `src/coach/` | Prompts et outils du coach IA (phase 3) | Outils en lecture seule + un outil « proposer une modification », toujours validée par Roméo. |
+| `src/lib/` | Utilitaires neutres : dates (`dates.ts`), formatage d'affichage (`format.ts`) | Fonctions pures, sans notion métier. |
+| `src/app/`, `src/components/` | Écrans et design system | Aucun calcul métier dans l'UI : les écrans appellent `db/repository`, `planner/`, `engine/` et `lib/`, puis affichent. |
+
+### Règles de dépendance
+- `engine/`, `planner/` et `lib/` ne lisent jamais la base ni le réseau : les données leur sont passées en argument.
+- `db/repository.ts` est le seul module qui sait d'où viennent les données (aujourd'hui : `seed/` ; demain : Supabase).
+- Le plan est **généré** par `planner/buildPlan` à partir de `seed/reference.ts`, puis inséré en base. Ensuite, c'est la base qui fait foi (D11).
 
 ## 4. Modèle de données (V1, à affiner en phase 1)
 - `athlete_profile` — FC max, zones, allures de référence, objectif
@@ -60,6 +69,6 @@ app/ + components/ ── interface (PWA mobile d'abord)
 - API Claude pour le coach (phase 3)
 
 ## 6. Environnements
-1. **Local** : `npm run dev` + Supabase local
+1. **Local** : `npm run dev` + Supabase local (`npm test` pour les tests)
 2. **En ligne** (phase 4) : GitHub → Vercel (aperçu par branche) + Supabase cloud
 Secrets : `.env.local` en local, variables d'environnement Vercel en ligne. Jamais dans le repo.

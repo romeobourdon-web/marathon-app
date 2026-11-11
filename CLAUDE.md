@@ -11,12 +11,14 @@ Lis les documents utiles dans `docs/` :
 - `docs/ROADMAP.md` — phase en cours et tâches
 - `docs/DESIGN.md` — direction visuelle
 
+Avant d'écrire du code Next.js : lis `AGENTS.md` et le guide correspondant dans `node_modules/next/dist/docs/` (cette version de Next.js diffère de ce que tu connais).
+
 ## Règles de travail
 1. **Mode plan d'abord** pour toute fonctionnalité ou restructuration : propose, attends validation, puis exécute.
 2. **Petites étapes** : une étape = un commit clair (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`).
 3. **Respecte les frontières de modules** (voir ARCHITECTURE.md) :
-   - `engine/` = fonctions pures, testées, sans réseau ni base de données.
-   - `connectors/` = seul endroit qui connaît Garmin/Strava.
+   - `src/engine/` = fonctions pures, testées, sans réseau ni base de données.
+   - `src/connectors/` = seul endroit qui connaît Garmin/Strava.
    - Les composants UI n'effectuent aucun calcul métier.
 4. **Aucun secret dans le code** : tout passe par `.env.local` (jamais commité).
 5. **Pas de nouvelle dépendance** sans l'annoncer et expliquer pourquoi.
@@ -26,4 +28,5 @@ Lis les documents utiles dans `docs/` :
 ## Conventions
 - TypeScript strict. Interface en français, code et noms de variables en anglais.
 - Mobile d'abord : chaque écran doit être utilisable sur un téléphone (390 px de large).
-- Données fictives uniquement dans `db/seed/`, jamais en dur dans les composants.
+- Données de référence réelles (course, profil athlète, zones) uniquement dans `src/db/seed/reference.ts`.
+- Données fictives uniquement dans `src/db/seed/mock/`. Jamais de données en dur dans les composants.
