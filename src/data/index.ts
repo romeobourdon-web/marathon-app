@@ -3,10 +3,15 @@
 
 import { daysBetween } from "@/lib/dates";
 import { mockActivity } from "./mock-activity";
-import { PHASES, PLANNED_SESSIONS, RACE, TOTAL_WEEKS, weekStart } from "./plan";
+import { PLAN_START, RACE, ZONES } from "@/db/seed/reference";
+import { PHASES, TOTAL_WEEKS, buildPlan, weekStart as planWeekStart } from "@/planner/plan";
 import type { Phase, Session } from "@/planner/types";
 
-export { PHASES, RACE, TOTAL_WEEKS, TYPE_LABELS, ZONES } from "./plan";
+export { RACE, ZONES } from "@/db/seed/reference";
+export { PHASES, TOTAL_WEEKS, TYPE_LABELS } from "@/planner/plan";
+
+const PLANNED_SESSIONS = buildPlan({ start: PLAN_START, raceName: RACE.name, zones: ZONES });
+const weekStart = (week: number) => planWeekStart(PLAN_START, week);
 export type * from "@/db/types";
 export type * from "@/planner/types";
 

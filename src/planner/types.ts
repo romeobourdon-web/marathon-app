@@ -38,6 +38,9 @@ export interface PlannedSession {
   targetHr: Range; // bpm
 }
 
+/** Zones d'allure (s/km) et de FC (bpm) par type de séance. */
+export type TrainingZones = Record<SessionType, { pace: Range; hr: Range }>;
+
 export type SessionStatus = "done" | "skipped" | "today" | "upcoming";
 
 export interface Session extends PlannedSession {

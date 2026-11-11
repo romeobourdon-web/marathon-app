@@ -1,23 +1,8 @@
-// Génère le plan d'entraînement fictif (30 semaines, 4 phases).
-// Tout est calculé à partir de quelques tableaux : facile à ajuster.
+// Génère le plan d'entraînement (30 semaines, 4 phases) à partir de quelques tableaux.
+// Le plan généré est ensuite inséré en base, qui fait foi (D11).
 
 import { addDays } from "@/lib/dates";
-import type { Race } from "@/db/types";
-import type { Phase, PhaseId, PlannedSession, Range, SessionType } from "@/planner/types";
-
-export const RACE: Race = {
-  name: "Marathon du Lac d'Annecy",
-  // ⚠️ Date à confirmer : la date officielle 2027 n'est pas encore publiée (prévue mi-avril).
-  // Si elle change, ajuster aussi le nombre de semaines dans WEEKS (le dernier dimanche = jour J).
-  date: "2027-04-18",
-  distanceKm: 42.195,
-  targetTimeSec: 3 * 3600 + 30 * 60,
-  targetPace: 298, // 4'58/km
-};
-
-// Un lundi. En pratique, l'athlète est encore en « phase libre » (pas strictement le plan) :
-// ~40-50 km/semaine et sortie longue déjà à 22 km, donc au-dessus des premières semaines prévues.
-export const PLAN_START = "2026-09-21";
+import type { Phase, PhaseId, PlannedSession, SessionType, TrainingZones } from "@/planner/types";
 
 export const PHASES: Phase[] = [
   {
@@ -45,25 +30,6 @@ export const PHASES: Phase[] = [
     weeks: { min: 28, max: 30 },
   },
 ];
-
-// FC max 185 bpm : la même valeur que celle utilisée pour les zones Strava de l'athlète.
-export const HR_MAX = 185;
-
-/** Fourchette de FC en % de la FC max → bpm. */
-function hr(minPct: number, maxPct: number): Range {
-  return { min: Math.round((HR_MAX * minPct) / 100), max: Math.round((HR_MAX * maxPct) / 100) };
-}
-
-// Zones d'allure (s/km) et de fréquence cardiaque (% FC max → bpm).
-export const ZONES: Record<SessionType, { pace: Range; hr: Range }> = {
-  recup: { pace: { min: 370, max: 395 }, hr: hr(62, 71) }, // 115–131
-  ef: { pace: { min: 345, max: 370 }, hr: hr(69, 77) }, // 128–142
-  "sortie-longue": { pace: { min: 340, max: 360 }, hr: hr(71, 78) }, // 131–144
-  allure: { pace: { min: 293, max: 300 }, hr: hr(82, 86) }, // 152–159
-  seuil: { pace: { min: 270, max: 280 }, hr: hr(87, 91) }, // 161–168
-  fractionne: { pace: { min: 235, max: 245 }, hr: hr(91, 97) }, // 168–179
-  course: { pace: { min: 295, max: 300 }, hr: hr(82, 88) }, // 152–163
-};
 
 export const TYPE_LABELS: Record<SessionType, string> = {
   ef: "Endurance",
@@ -124,7 +90,14 @@ function qualityWorkout(week: number, phase: PhaseId, light: boolean): Workout {
   }
 }
 
-function longRun(km: number, phase: PhaseId): Workout {
+/** Paramètres de génération, issus des données de référence (db/seed/reference.ts). */
+export interface PlanParams {
+  start: string; // un lundi, "AAAA-MM-JJ"
+  raceName: string;
+  zones: TrainingZones;
+}
+
+function longRun(km: number, phase: PhaseId, zones: TrainingZones): Workout {
   if (phase === "specifique") {
     const am = Math.round(km * 0.35);
     return {
@@ -136,18 +109,19 @@ function longRun(km: number, phase: PhaseId): Workout {
   return {
     type: "sortie-longue",
     title: "Sortie longue",
-    details: `${km} km en endurance, FC sous ${ZONES["sortie-longue"].hr.max}. Boire toutes les 20'.`,
+    details: `${km} km en endurance, FC sous ${zones["sortie-longue"].hr.max}. Boire toutes les 20'.`,
   };
 }
 
 function session(
+  params: PlanParams,
   week: number,
   dayOffset: number,
   w: Workout,
   distanceKm: number,
   phase: PhaseId,
 ): PlannedSession {
-  const date = addDays(PLAN_START, (week - 1) * 7 + dayOffset);
+  const date = addDays(params.start, (week - 1) * 7 + dayOffset);
   return {
     id: `s${week}-${dayOffset}`,
     date,
@@ -155,12 +129,12 @@ function session(
     phase,
     ...w,
     distanceKm,
-    targetPace: ZONES[w.type].pace,
-    targetHr: ZONES[w.type].hr,
+    targetPace: params.zones[w.type].pace,
+    targetHr: params.zones[w.type].hr,
   };
 }
 
-function buildPlan(): PlannedSession[] {
+export function buildPlan(params: PlanParams): PlannedSession[] {
   const sessions: PlannedSession[] = [];
 
   WEEKS.forEach(([volume, longKm, light], i) => {
@@ -170,9 +144,9 @@ function buildPlan(): PlannedSession[] {
     if (week === WEEKS.length) {
       // Semaine de course
       sessions.push(
-        session(week, 1, { type: "allure", title: "Dernier rappel", details: "Échauffement 15', 3 × 2 km à 4'58, 10' au calme." }, 9, phase),
-        session(week, 3, { type: "ef", title: "Footing de veille", details: "Très facile, quelques lignes droites. Préparer le dossard." }, 6, phase),
-        session(week, 6, { type: "course", title: RACE.name, details: "Départ prudent (5'00 sur 5 km), puis 4'58 jusqu'au 30e. Ensuite, tout donner." }, 42.2, phase),
+        session(params, week, 1, { type: "allure", title: "Dernier rappel", details: "Échauffement 15', 3 × 2 km à 4'58, 10' au calme." }, 9, phase),
+        session(params, week, 3, { type: "ef", title: "Footing de veille", details: "Très facile, quelques lignes droites. Préparer le dossard." }, 6, phase),
+        session(params, week, 6, { type: "course", title: params.raceName, details: "Départ prudent (5'00 sur 5 km), puis 4'58 jusqu'au 30e. Ensuite, tout donner." }, 42.2, phase),
       );
       return;
     }
@@ -183,27 +157,28 @@ function buildPlan(): PlannedSession[] {
     const ef2 = rest - q - ef1;
 
     sessions.push(
-      session(week, 1, qualityWorkout(week, phase, light), q, phase),
+      session(params, week, 1, qualityWorkout(week, phase, light), q, phase),
       session(
+        params,
         week,
         2,
         light
           ? { type: "recup", title: "Footing récup", details: "Très lent, en aisance respiratoire totale." }
-          : { type: "ef", title: "Footing EF", details: `Allure conversation. Surveiller la FC : rester sous ${ZONES.ef.hr.max}.` },
+          : { type: "ef", title: "Footing EF", details: `Allure conversation. Surveiller la FC : rester sous ${params.zones.ef.hr.max}.` },
         ef1,
         phase,
       ),
-      session(week, 4, { type: "ef", title: "Footing + lignes droites", details: "Endurance facile, puis 5 lignes droites de 80 m relâchées." }, ef2, phase),
-      session(week, 6, longRun(longKm, phase), longKm, phase),
+      session(params, week, 4, { type: "ef", title: "Footing + lignes droites", details: "Endurance facile, puis 5 lignes droites de 80 m relâchées." }, ef2, phase),
+      session(params, week, 6, longRun(longKm, phase, params.zones), longKm, phase),
     );
   });
 
   return sessions;
 }
 
-export const PLANNED_SESSIONS: PlannedSession[] = buildPlan();
 export const TOTAL_WEEKS = WEEKS.length;
 
-export function weekStart(week: number): string {
-  return addDays(PLAN_START, (week - 1) * 7);
+/** Lundi de la semaine `week` du plan. */
+export function weekStart(planStart: string, week: number): string {
+  return addDays(planStart, (week - 1) * 7);
 }
