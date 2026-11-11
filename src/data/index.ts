@@ -2,7 +2,7 @@
 // le jour où l'on branche Supabase/Strava, seul ce fichier change.
 
 import { daysBetween } from "@/lib/dates";
-import { mockActivity } from "./mock-activity";
+import { mockActivity } from "@/db/seed/mock/activity";
 import { PLAN_START, RACE, ZONES } from "@/db/seed/reference";
 import { PHASES, TOTAL_WEEKS, buildPlan, weekStart as planWeekStart } from "@/planner/plan";
 import type { Phase, Session } from "@/planner/types";

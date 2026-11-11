@@ -1,4 +1,4 @@
-// Simule ce que Strava renverra plus tard : pour chaque séance passée,
+// DONNÉES FICTIVES. Simule ce que la source d'activités renverra plus tard : pour chaque séance passée,
 // un « réalisé » et une entrée de journal. Le hasard est « graine fixe »
 // (même séance → même résultat à chaque rechargement).
 
