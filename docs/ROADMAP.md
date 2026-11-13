@@ -5,23 +5,29 @@ Marathon : Annecy, avril 2027 (date à confirmer). Départ à l'EPFL : 16 févri
 ## Données de référence
 - Course : Marathon du Lac d'Annecy 2027. Date provisoire : **dimanche 18 avril 2027** (⚠️ à confirmer dès publication).
 - Début du plan : **lundi 21 septembre 2026** (30 semaines). En réalité, phase libre pour l'instant : ~40-50 km/semaine, sortie longue à 22 km.
-- FC max : **185 bpm** (identique aux zones Strava).
+- FC max : **185 bpm**.
 - Ces valeurs vivent dans `src/db/seed/reference.ts`.
 
 ## Phase 0 — Cadrage (semaine du 11 nov.)
 - [x] Git : commit de l'existant, tag `v0-prototype`, repo GitHub privé
 - [x] `docs/` + `CLAUDE.md` ajoutés au repo
 - [x] Audit du code existant par Claude Code (mode plan) et décision garder/supprimer
-- [ ] Projet Claude QG configuré (instructions + docs)
+- [x] Projet Claude QG configuré (instructions + docs)
 - [ ] Benchmark : apps concurrentes, méthodes d'entraînement, design
-- [ ] Direction design précisée (`DESIGN.md`)
+- [x] Direction design précisée (`DESIGN.md` v1, D16)
 
 ## Phase 1 — Fondations (fin nov.)
 - [x] Restructuration selon ARCHITECTURE.md
 - [x] `src/engine/` créé dès maintenant : calculs sortis de l'UI + tests (vitest)
-- [ ] Supabase local + schéma V1 + données fictives
-- [ ] Connecteur Garmin (ou Strava en transition) : import des vraies activités
-- [ ] Design system de base (couleurs, typo, composants)
+- [x] Source de données tranchée : Garmin Personal API (D13), schéma V1 (D14)
+- [ ] M1 — Sonde Garmin → `docs/GARMIN.md` (D15), puis retour au QG
+- [ ] M2 — Supabase local
+- [ ] M3 — Migrations du schéma V1 + seed (référence, plan généré, données fictives)
+- [ ] M4 — Repository branché sur Supabase + connexion
+- [ ] M5 — Connecteur Garmin + `npm run sync` : import des vraies activités
+- [ ] M6 — Design system v1 (tokens, polices, 11 composants, page `/design`)
+
+Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 
 ## Phase 2 — Utile (mi-déc.)
 - [ ] Calendrier : prévu / réalisé / écarts
@@ -32,11 +38,12 @@ Marathon : Annecy, avril 2027 (date à confirmer). Départ à l'EPFL : 16 févri
 ## Phase 3 — Intelligence (janv.)
 - [ ] `SCIENCE.md` : formules et sources
 - [ ] `src/engine/` : métriques d'entraînement (charge, forme/fatigue…) + tests
-- [ ] Vue « état de forme »
+- [ ] Vue « état de forme » (score calculé par `engine/`, remplace les valeurs « démo » de D16)
 - [ ] Coach IA dans l'app (prompt mis au point dans le projet Claude Coach)
 
 ## Phase 4 — En ligne et mobile (fin janv.)
 - [ ] Déploiement Vercel + Supabase cloud
+- [ ] Synchro Garmin automatique (tâche planifiée) + bouton « Synchroniser »
 - [ ] PWA installable
 - [ ] Accès tuteur en lecture seule
 
