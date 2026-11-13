@@ -25,6 +25,13 @@ Avant d'écrire du code Next.js : lis `AGENTS.md` et le guide correspondant dans
 6. Si une demande contredit `docs/`, **signale-le** au lieu de trancher seul.
 7. Fin de tâche : résume ce qui a changé, ce qui reste, et coche la tâche dans `docs/ROADMAP.md`.
 
+## Autonomie
+Voir D12 (`docs/DECISIONS.md`) et les permissions de `.claude/settings.json`.
+- Quand un plan est validé, exécute-le jusqu'au bout sans redemander.
+- Après chaque étape : `npm run lint` + `npm run build` + `npm test`. Si tout passe, commit. À la fin, push.
+- Arrête-toi seulement si : nouvelle dépendance, suppression non prévue, contradiction avec `docs/`, ou deux échecs de suite sur le même problème.
+- Termine toujours par un résumé de 10 lignes maximum : fait / écarts / hors cadre.
+
 ## Conventions
 - TypeScript strict. Interface en français, code et noms de variables en anglais.
 - Mobile d'abord : chaque écran doit être utilisable sur un téléphone (390 px de large).
