@@ -14,6 +14,10 @@ export const RACE: Race = {
   targetPace: 298, // 4'58/km
 };
 
+// Lancement du Défi : 5 km de référence en 18'51 (D17). L'historique est importé depuis cette date ;
+// les activités antérieures au plan n'ont pas de séance prévue (« hors plan »).
+export const PROJECT_START = "2026-04-04";
+
 // Un lundi. En pratique, l'athlète est encore en « phase libre » (pas strictement le plan) :
 // ~40-50 km/semaine et sortie longue déjà à 22 km, donc au-dessus des premières semaines prévues.
 export const PLAN_START = "2026-09-21";
