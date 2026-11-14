@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, daysBetween, splitWeeksDays, todayInParis } from "@/lib/dates";
+import { addDays, dateChunks, daysBetween, splitWeeksDays, todayInParis } from "@/lib/dates";
 
 describe("dates", () => {
   it("addDays traverse les mois et les années", () => {
@@ -20,5 +20,18 @@ describe("dates", () => {
     expect(splitWeeksDays(158)).toEqual({ weeks: 22, days: 4 });
     expect(splitWeeksDays(7)).toEqual({ weeks: 1, days: 0 });
     expect(splitWeeksDays(0)).toEqual({ weeks: 0, days: 0 });
+  });
+});
+
+describe("dateChunks", () => {
+  it("découpe une plage en tranches de taille maximale, bornes incluses", () => {
+    expect(dateChunks("2026-04-04", "2026-05-10", 31)).toEqual([
+      { from: "2026-04-04", to: "2026-05-04" },
+      { from: "2026-05-05", to: "2026-05-10" },
+    ]);
+  });
+  it("renvoie une seule tranche si la plage est courte, aucune si elle est vide", () => {
+    expect(dateChunks("2026-04-04", "2026-04-04", 31)).toEqual([{ from: "2026-04-04", to: "2026-04-04" }]);
+    expect(dateChunks("2026-04-05", "2026-04-04", 31)).toEqual([]);
   });
 });

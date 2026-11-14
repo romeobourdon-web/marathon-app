@@ -30,3 +30,13 @@ export function todayInParis(now: Date = new Date()): string {
 export function splitWeeksDays(totalDays: number): { weeks: number; days: number } {
   return { weeks: Math.floor(totalDays / 7), days: totalDays % 7 };
 }
+
+/** Découpe [from, to] (bornes incluses) en tranches d'au plus `maxDays` jours. */
+export function dateChunks(from: string, to: string, maxDays: number): { from: string; to: string }[] {
+  const chunks: { from: string; to: string }[] = [];
+  for (let start = from; start <= to; start = addDays(start, maxDays)) {
+    const end = addDays(start, maxDays - 1);
+    chunks.push({ from: start, to: end < to ? end : to });
+  }
+  return chunks;
+}
