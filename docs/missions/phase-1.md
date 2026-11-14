@@ -97,10 +97,11 @@ Lis docs/ARCHITECTURE.md (règles de dépendance) et src/db/repository.ts.
 
 ```
 Mission M5 — Connecteur Garmin et synchro.
-Lis docs/ARCHITECTURE.md (connectors/, scripts/), docs/GARMIN.md et docs/DECISIONS.md (D13).
+Lis docs/ARCHITECTURE.md (connectors/, scripts/), docs/GARMIN.md et docs/DECISIONS.md (D13, D17 à D21). Réutilise ce qui sert dans scripts/garmin-probe.ts.
 1. Crée src/connectors/types.ts avec l'interface DataSource : fetchActivities(from, to), fetchStreams(activityId), fetchWellness(from, to). Elle doit renvoyer des types neutres, sans rien de spécifique à Garmin.
 2. Crée src/connectors/garmin/ : gestion du token (un nouveau token quand il expire, 24 h), appels et conversion Garmin → types neutres. Tests de conversion sur des données JSON anonymisées tirées de samples/ (pas de GPS réel dans les tests).
-3. Si les séries temporelles n'existent qu'en FIT, propose une dépendance de lecture FIT (de préférence le SDK officiel Garmin) et attends ma validation.
+3. Séries temporelles : uniquement dans le FIT (voir GARMIN.md §4). Dépendance pré-approuvée par le QG (D21) : @garmin/fitsdk (SDK officiel Garmin). Ajoute-la sans redemander, mais annonce-la dans ton résumé. Respecte les plages max. par requête (sommeil ≤ 32 jours) et garde 0,5 à 1 s entre les appels, avec gestion d'un éventuel 429.
+3 bis. Toutes les activités sont importées avec leur sport (D21). Pour chaque nouvelle activité, appelle le détail pour récupérer directWorkoutRpe / directWorkoutFeel → activity.device_rpe / device_feel (D20). Le GPS est conservé dans raw et activity_stream (D19). start_time vient de startTimeGMT (UTC, sans fuseau : à convertir).
 4. Commande npm run sync [--from AAAA-MM-JJ] (scripts/sync.ts) : elle ouvre une entrée sync_run, récupère les données, fait les upserts via le repository, lie automatiquement chaque activité à la séance prévue du même jour et ferme l'entrée sync_run (succès ou erreur).
 5. L'import initial part du 2026-04-04 (lancement du Défi, constante PROJECT_START).
 ```

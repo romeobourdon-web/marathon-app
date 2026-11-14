@@ -33,7 +33,8 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 ## Phase 2 — Utile (mi-déc.)
 - [ ] Calendrier : prévu / réalisé / écarts
 - [ ] Historique des activités + détail d'une séance
-- [ ] Questionnaire du matin + journal après séance (mobile)
+- [ ] Questionnaire du matin + journal après séance (mobile) : commentaire libre juste après la séance, pré-rempli avec le ressenti saisi sur la montre ; aussi pour une séance prévue non faite (D20)
+- [ ] Saisie manuelle d'une sortie faite sans montre (D18)
 - [ ] Échéances (courses) et compte à rebours
 
 ## Phase 3 — Intelligence (janv.)
@@ -41,6 +42,7 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 - [ ] `src/engine/` : métriques d'entraînement (charge, forme/fatigue…) + tests
 - [ ] Vue « état de forme » (score calculé par `engine/`, remplace les valeurs « démo » de D16)
 - [ ] Coach IA dans l'app (prompt mis au point dans le projet Claude Coach)
+- [ ] Analyse IA de chaque séance : données + journal (`session_analysis`, D20)
 
 ## Phase 4 — En ligne et mobile (fin janv.)
 - [ ] Déploiement Vercel + Supabase cloud

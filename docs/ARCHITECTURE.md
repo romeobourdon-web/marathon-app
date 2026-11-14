@@ -51,7 +51,7 @@ Un dossier n'est créé que lorsqu'il reçoit du code (pas de dossier vide).
 - `db/repository.ts` est le seul module qui sait d'où viennent les données (aujourd'hui : `seed/` ; demain : Supabase).
 - Le plan est **généré** par `planner/buildPlan` à partir de `seed/reference.ts`, puis inséré en base. Ensuite, c'est la base qui fait foi (D11).
 
-## 4. Modèle de données (V1 — D14, à ajuster après la sonde M1)
+## 4. Modèle de données (V1 — D14, ajusté après la sonde M1 : D19 à D21, voir `GARMIN.md`)
 
 Principes : `user_id` + RLS sur chaque table · mesures brutes uniquement (m, s, m/s, bpm) · écarts, allures et statuts **calculés** par `engine/` et `planner/`, jamais stockés · `text` + `CHECK` plutôt que des enums · une table n'est créée que quand elle sert.
 
@@ -70,22 +70,27 @@ planned_session   id · plan_id → plan · phase_id → plan_phase · date · w
 ── Réalisé (source : Garmin, D13) ─────────────────────
 activity          id · source (garmin|fit_file|manual|mock) · source_id · UNIQUE(source, source_id)
                   · start_time timestamptz · local_date · sport · distance_m · moving_time_s · elapsed_time_s
-                  · avg_hr · max_hr · avg_speed_mps · elevation_gain_m · raw jsonb
+                  · avg_hr · max_hr · avg_speed_mps · elevation_gain_m
+                  · device_rpe? · device_feel? (ressenti saisi sur la montre, D20) · raw jsonb (GPS conservé, D19)
 activity_stream   activity_id PK → activity · time_s[] · distance_m[] · hr[] · speed_mps[] · altitude_m[] · cadence[] · lat[] · lng[]
 wellness          (user_id, date) PK · resting_hr · hrv_ms · sleep_s · sleep_score · raw jsonb
 sync_run          id · source · started_at · finished_at · status · range_from · range_to · upserted · error
 
 ── Liaison & ressenti ────────────────────────────────
 session_link      id · planned_session_id → planned_session · activity_id → activity (UNIQUE) · method (auto|manual)
-journal_entry     id · activity_id → activity (UNIQUE) · feeling 1-5 · rpe 1-10 · note
+journal_entry     id · activity_id? → activity (UNIQUE) · planned_session_id? → planned_session (UNIQUE)
+                  · CHECK (au moins un des deux) · feeling 1-5 · rpe 1-10 · comment text · pain_note · created_at · updated_at
 daily_checkin     (user_id, date) PK · fatigue 1-5 · sleep_quality 1-5 · soreness 1-5 · motivation 1-5 · pain_note
 ```
 
-Relations : plan 1→n plan_phase 1→n planned_session ; planned_session 1→0..n activity (via session_link, ex. double footing) ; activity 1→0..1 journal_entry.
+Relations : plan 1→n plan_phase 1→n planned_session ; planned_session 1→0..n activity (via session_link, ex. double footing) ; activity 1→0..1 journal_entry ; une séance prévue **non faite** peut aussi avoir un journal (raison de l'écart, D08/D20).
+
+Synchro (D21) : toutes les activités Garmin sont importées avec leur `sport` ; `engine/` et l'UI filtrent la course (`running`, `treadmill_running`). Les données de bien-être sont éparses (VFC depuis le 2026-05-17, peu de nuits de sommeil) : `engine/` gère les jours manquants sans interpolation silencieuse (D04).
 
 Plus tard (créées quand elles servent) :
 - `plan_change` — trace des modifications du plan (D11), à la première modification manuelle (phase 2-3)
 - `coach_message` — historique du coach (phase 3)
+- `session_analysis` — analyse IA d'une séance (données + journal), texte explicatif sans nouveau chiffre (D04, D07, D20) — phase 3
 - `activity_metrics` — seulement si le calcul à la volée par `engine/` devient trop lent
 
 ## 5. Stack
