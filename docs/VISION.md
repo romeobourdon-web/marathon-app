@@ -2,6 +2,7 @@
 
 ## Pourquoi
 Piloter une préparation marathon (Marathon du Lac d'Annecy, avril 2027, objectif < 3h30) avec une app construite sur mesure, dans le cadre du Défi G1-G2 (Centrale Lille).
+L'app s'appelle **Target 42** (nom définitif, D24).
 
 ## Pour qui
 - **Roméo**, seul utilisateur.
@@ -19,7 +20,7 @@ En 10 secondes, le matin, sur le téléphone :
 |---|---|
 | **Science** | Décisions fondées sur les données et sur des méthodes reconnues, sources citées (`SCIENCE.md`, à venir). |
 | **Utilité** | Calendrier prévu/réalisé, historique, état de forme, échéances, coach IA intégré. Chaque écran doit servir une décision. |
-| **Identité** | Design sombre premium, fort, reconnaissable. Pas un template « fait par une IA ». |
+| **Identité** | Design clair « énergie course » (fond crème, accent corail, grands chiffres), fort, reconnaissable. Pas un template « fait par une IA ». |
 
 ## Principes
 - **Prévu ≠ réalisé, et c'est normal.** L'app mesure et explique les écarts au lieu de les cacher.

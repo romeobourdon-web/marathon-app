@@ -1,4 +1,4 @@
-# Marathon App
+# Target 42
 
 App web perso de pilotage d'une préparation marathon (Défi G1-G2, Centrale Lille).
 Specs et décisions : voir [`docs/`](docs/) et [`CLAUDE.md`](CLAUDE.md).

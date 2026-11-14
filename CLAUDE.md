@@ -1,4 +1,4 @@
-# Marathon App — instructions pour Claude Code
+# Target 42 — instructions pour Claude Code
 
 App web perso de pilotage d'une préparation marathon (Défi G1-G2, Centrale Lille).
 Un seul utilisateur (Roméo) + un accès tuteur en lecture seule.
