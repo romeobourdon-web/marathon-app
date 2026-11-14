@@ -1,6 +1,9 @@
 // Petites fonctions d'affichage partagées par toutes les pages.
 
-/** 298 → "4'58" */
+/**
+ * 298 → "4'58"
+ * @deprecated prototype (D10) : supprimer avec le prototype.
+ */
 export function formatPace(secondsPerKm: number): string {
   const s = Math.round(secondsPerKm);
   const min = Math.floor(s / 60);
@@ -8,13 +11,19 @@ export function formatPace(secondsPerKm: number): string {
   return `${min}'${sec.toString().padStart(2, "0")}`;
 }
 
-/** { min: 290, max: 300 } → "4'50–5'00" (min = plus rapide) */
+/**
+ * { min: 290, max: 300 } → "4'50–5'00" (min = plus rapide)
+ * @deprecated prototype (D10) : supprimer avec le prototype.
+ */
 export function formatPaceRange(range: { min: number; max: number }): string {
   if (range.min === range.max) return formatPace(range.min);
   return `${formatPace(range.min)}–${formatPace(range.max)}`;
 }
 
-/** 12600 → "3h30" ; 3725 → "1h02" ; 2700 → "45 min" */
+/**
+ * 12600 → "3h30" ; 3725 → "1h02" ; 2700 → "45 min"
+ * @deprecated prototype (D10) : supprimer avec le prototype.
+ */
 export function formatDuration(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.round((totalSeconds % 3600) / 60);
@@ -22,6 +31,7 @@ export function formatDuration(totalSeconds: number): string {
   return `${h}h${m.toString().padStart(2, "0")}`;
 }
 
+/** @deprecated prototype (D10) : supprimer avec le prototype. */
 export function formatKm(km: number, digits = 1): string {
   return km.toLocaleString("fr-FR", {
     minimumFractionDigits: 0,
@@ -42,12 +52,74 @@ const shortFormatter = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "UTC",
 });
 
-/** "2026-10-16" → "vendredi 16 octobre" */
+/**
+ * "2026-10-16" → "vendredi 16 octobre"
+ * @deprecated prototype (D10) : supprimer avec le prototype.
+ */
 export function formatDayLong(isoDate: string): string {
   return dayFormatter.format(new Date(`${isoDate}T00:00:00Z`));
 }
 
-/** "2026-10-16" → "ven. 16 oct." */
+/**
+ * "2026-10-16" → "ven. 16 oct."
+ * @deprecated prototype (D10) : supprimer avec le prototype.
+ */
 export function formatDayShort(isoDate: string): string {
   return shortFormatter.format(new Date(`${isoDate}T00:00:00Z`));
+}
+
+// ── Formats du design system v1 (DESIGN.md §3) ─────────────────────────────
+// Espace insécable entre valeur et unité ; virgule décimale ; vrai signe moins (U+2212).
+
+const NBSP = " ";
+const MINUS = "−";
+
+function frNumber(value: number, digits: number): string {
+  return value.toLocaleString("fr-FR", { minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
+}
+
+/** 330 → "5'30 /km" (secondes par km) */
+export function formatPacePerKm(secondsPerKm: number): string {
+  const s = Math.round(secondsPerKm);
+  return `${Math.floor(s / 60)}'${(s % 60).toString().padStart(2, "0")}${NBSP}/km`;
+}
+
+/** 3960 → "1:06:00" ; 2712 → "45:12" */
+export function formatClock(totalSeconds: number): string {
+  const s = Math.round(totalSeconds);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = (s % 60).toString().padStart(2, "0");
+  return h > 0 ? `${h}:${m.toString().padStart(2, "0")}:${sec}` : `${m}:${sec}`;
+}
+
+/** 3960 → "≈ 1 h 06" ; 2700 → "≈ 45 min" (arrondi à la minute) */
+export function formatDurationApprox(totalSeconds: number): string {
+  const total = Math.round(totalSeconds / 60);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return h > 0 ? `≈${NBSP}${h}${NBSP}h${NBSP}${m.toString().padStart(2, "0")}` : `≈${NBSP}${m}${NBSP}min`;
+}
+
+/** 25 600 m → "25,6 km" (mètres en entrée, mesure brute) */
+export function formatDistance(meters: number, digits = 1): string {
+  return `${frNumber(meters / 1000, digits)}${NBSP}km`;
+}
+
+/** 5 → "+5" ; −0,6 → "−0,6" ; 0 → "0" (écart signé, vrai signe moins) */
+export function formatSignedDelta(value: number, digits = 0): string {
+  const rounded = Number(value.toFixed(digits));
+  if (rounded === 0) return frNumber(0, digits);
+  const abs = frNumber(Math.abs(rounded), digits);
+  return rounded > 0 ? `+${abs}` : `${MINUS}${abs}`;
+}
+
+const dateFormatters = {
+  short: new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }),
+  long: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }),
+};
+
+/** "2026-11-14" → "sam. 14 nov." (short) ou "samedi 14 novembre" (long) */
+export function formatDate(isoDate: string, style: "short" | "long" = "short"): string {
+  return dateFormatters[style].format(new Date(`${isoDate}T00:00:00Z`));
 }
