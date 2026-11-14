@@ -27,8 +27,8 @@ export default function DashboardPage() {
 async function Dashboard() {
   await connection();
   const today = todayInParis();
-  const planStart = getPlanStart();
-  const sessions = getSessions(today);
+  const planStart = await getPlanStart();
+  const sessions = await getSessions(today);
   const week = currentWeek(planStart, today);
   const summary = weekSummary(sessions, planStart, week, today);
   const next = nextSession(sessions);
@@ -48,8 +48,8 @@ async function Dashboard() {
   );
 }
 
-function Countdown({ today, week, summary, className }: { today: string; week: number; summary: WeekSummary; className?: string }) {
-  const RACE = getRace();
+async function Countdown({ today, week, summary, className }: { today: string; week: number; summary: WeekSummary; className?: string }) {
+  const RACE = await getRace();
   const days = daysToRace(today, RACE.date);
   const remaining = splitWeeksDays(days);
   const progress = planProgressPct(week, TOTAL_WEEKS);

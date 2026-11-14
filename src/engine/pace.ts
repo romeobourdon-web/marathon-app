@@ -8,3 +8,17 @@ export function paceGap(pace: number, target: Range): number {
   if (pace > target.max) return pace - target.max;
   return 0;
 }
+
+/** Allure (s/km, arrondie à la seconde) à partir d'une vitesse en m/s. Vitesse nulle → null. */
+export function paceFromSpeed(speedMps: number): number | null {
+  if (speedMps <= 0) return null;
+  return Math.round(1000 / speedMps);
+}
+
+/**
+ * Allure cible (s/km) pour tenir un temps sur une distance. Arrondie à la seconde inférieure :
+ * c'est l'allure qu'il faut tenir (ou battre) pour passer sous le temps visé (3 h 30 sur 42,195 km → 298).
+ */
+export function targetPace(targetTimeS: number, distanceM: number): number {
+  return Math.floor(targetTimeS / (distanceM / 1000));
+}

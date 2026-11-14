@@ -20,7 +20,7 @@ export default function SeancesPage() {
 
 async function SessionList() {
   await connection();
-  const past = getSessions(todayInParis())
+  const past = (await getSessions(todayInParis()))
     .filter((s) => s.status === "done" || s.status === "skipped")
     .reverse();
 

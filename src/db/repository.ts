@@ -1,33 +1,173 @@
-// Seul point d'accès aux données pour les écrans. Aujourd'hui tout vient de
-// seed/ ; le jour où l'on branche Supabase, seul ce fichier change.
+// Seul point d'accès aux données pour les écrans et les scripts. Les données viennent de Supabase :
+//  - lectures des écrans : client de la requête (session de l'utilisateur, RLS « propriétaire uniquement ») ;
+//  - écritures de la synchro : client admin (clé secrète, scripts uniquement), user_id explicite.
+// Le plan a été généré par planner/buildPlan puis inséré par le seed : la base fait foi (D11).
 
-import type { Race } from "@/db/types";
-import { mockActivity } from "@/db/seed/mock/activity";
+import type { TablesInsert } from "@/db/database.types";
+import { toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
 import { DESIGN_PREVIEW } from "@/db/seed/mock/design";
-import { PLAN_START, RACE, ZONES } from "@/db/seed/reference";
-import { buildPlan } from "@/planner/plan";
+import { createSupabaseAdminClient } from "@/db/supabase/admin";
+import { createSupabaseServerClient } from "@/db/supabase/server";
+import type { Race } from "@/db/types";
 import { linkSessions } from "@/planner/sessions";
 import type { Session } from "@/planner/types";
 
-// D11 : le plan est généré par planner/ puis inséré en base. En attendant
-// Supabase, la « base » est ce tableau généré une fois au chargement.
-const PLANNED_SESSIONS = buildPlan({ start: PLAN_START, raceName: RACE.name, zones: ZONES });
-
-export function getRace(): Race {
-  return RACE;
+function fail(what: string, error: { message: string } | null): never {
+  throw new Error(`Lecture impossible (${what}) : ${error?.message ?? "aucune donnée — utilisateur connecté et base initialisée ?"}`);
 }
 
-/** Lundi de la semaine 1 du plan. */
-export function getPlanStart(): string {
-  return PLAN_START;
+// ── Lectures (écrans) ──────────────────────────────────────────────────────
+
+/** Événement objectif de l'athlète. */
+export async function getRace(): Promise<Race> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("athlete_profile")
+    .select("event:goal_event_id (name, date, distance_m, target_time_s)")
+    .maybeSingle();
+  if (error || !data?.event) fail("objectif", error);
+  return toRace(data.event);
 }
 
-/** Toutes les séances du plan, liées au réalisé à la date `today`. */
-export function getSessions(today: string): Session[] {
-  return linkSessions(PLANNED_SESSIONS, today, mockActivity);
+/** Lundi de la semaine 1 du plan actif. */
+export async function getPlanStart(): Promise<string> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("plan").select("start_date").eq("is_active", true).maybeSingle();
+  if (error || !data) fail("plan actif", error);
+  return data.start_date;
+}
+
+const SESSION_SELECT = `
+  id, date, week, type, title, details, distance_m, pace_min_s_km, pace_max_s_km, hr_min, hr_max,
+  plan_phase (code),
+  session_link (
+    activity (start_time, distance_m, moving_time_s, avg_hr, avg_speed_mps, journal_entry (feeling, rpe, comment))
+  )
+`;
+
+/** Toutes les séances du plan actif, liées au réalisé (session_link) ; statut calculé par planner/ à la date `today`. */
+export async function getSessions(today: string): Promise<Session[]> {
+  const supabase = await createSupabaseServerClient();
+  const plan = await supabase.from("plan").select("id").eq("is_active", true).maybeSingle();
+  if (plan.error || !plan.data) fail("plan actif", plan.error);
+  const { data, error } = await supabase
+    .from("planned_session")
+    .select(SESSION_SELECT)
+    .eq("plan_id", plan.data.id)
+    .order("date")
+    .returns<PlannedSessionRow[]>();
+  if (error || !data) fail("séances", error);
+
+  const results = new Map(data.map((row) => [row.id, toActivityResult(row)]));
+  return linkSessions(data.map(toPlannedSession), today, (s) => results.get(s.id) ?? { skipped: true });
 }
 
 /** Données fictives de la page /design (D16) : toujours affichées avec un Chip « démo ». */
 export function getDesignPreview() {
   return DESIGN_PREVIEW;
+}
+
+// ── Connexion ──────────────────────────────────────────────────────────────
+
+/** Ouvre une session (cookies posés par le client serveur). Renvoie false si les identifiants sont refusés. */
+export async function signIn(email: string, password: string): Promise<boolean> {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return !error;
+}
+
+// ── Écritures (synchro, scripts uniquement) ─────────────────────────────────
+
+type Owned<T> = Omit<T, "user_id">;
+export type ActivityInput = Owned<TablesInsert<"activity">>;
+export type StreamInput = Owned<TablesInsert<"activity_stream">>;
+export type WellnessInput = Owned<TablesInsert<"wellness">>;
+export type SyncSource = TablesInsert<"sync_run">["source"];
+
+function writeError(what: string, error: { message: string }): never {
+  throw new Error(`Écriture impossible (${what}) : ${error.message}`);
+}
+
+/** Insère ou met à jour des activités (clé : source + source_id). Renvoie id et source_id de chaque ligne. */
+export async function upsertActivities(userId: string, rows: ActivityInput[]): Promise<{ id: string; source_id: string }[]> {
+  if (rows.length === 0) return [];
+  const { data, error } = await createSupabaseAdminClient()
+    .from("activity")
+    .upsert(
+      rows.map((r) => ({ ...r, user_id: userId })),
+      { onConflict: "source,source_id" },
+    )
+    .select("id, source_id");
+  if (error) writeError("activités", error);
+  return data;
+}
+
+/** Insère ou remplace les séries temporelles (une ligne par activité). */
+export async function upsertStreams(userId: string, rows: StreamInput[]): Promise<number> {
+  if (rows.length === 0) return 0;
+  const { error, count } = await createSupabaseAdminClient()
+    .from("activity_stream")
+    .upsert(
+      rows.map((r) => ({ ...r, user_id: userId })),
+      { onConflict: "activity_id", count: "exact" },
+    );
+  if (error) writeError("séries temporelles", error);
+  return count ?? rows.length;
+}
+
+/** Insère ou met à jour le bien-être quotidien (clé : utilisateur + date). */
+export async function upsertWellness(userId: string, rows: WellnessInput[]): Promise<number> {
+  if (rows.length === 0) return 0;
+  const { error, count } = await createSupabaseAdminClient()
+    .from("wellness")
+    .upsert(
+      rows.map((r) => ({ ...r, user_id: userId })),
+      { onConflict: "user_id,date", count: "exact" },
+    );
+  if (error) writeError("bien-être", error);
+  return count ?? rows.length;
+}
+
+/** Lie une activité à une séance prévue. Sans effet si l'activité est déjà liée (activity_id UNIQUE). */
+export async function linkSession(
+  userId: string,
+  plannedSessionId: string,
+  activityId: string,
+  method: "auto" | "manual" = "auto",
+): Promise<void> {
+  const { error } = await createSupabaseAdminClient()
+    .from("session_link")
+    .upsert(
+      { user_id: userId, planned_session_id: plannedSessionId, activity_id: activityId, method },
+      { onConflict: "activity_id", ignoreDuplicates: true },
+    );
+  if (error) writeError("liaison", error);
+}
+
+/** Ouvre une entrée sync_run (statut running) et renvoie son id. */
+export async function startSyncRun(userId: string, source: SyncSource, rangeFrom: string, rangeTo: string): Promise<string> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from("sync_run")
+    .insert({ user_id: userId, source, range_from: rangeFrom, range_to: rangeTo, status: "running" })
+    .select("id")
+    .single();
+  if (error) writeError("début de synchro", error);
+  return data.id;
+}
+
+/** Ferme une entrée sync_run : succès (nombre de lignes écrites) ou erreur (message). */
+export async function finishSyncRun(
+  syncRunId: string,
+  result: { status: "success"; upserted: number } | { status: "error"; upserted: number; error: string },
+): Promise<void> {
+  const { error } = await createSupabaseAdminClient()
+    .from("sync_run")
+    .update({
+      status: result.status,
+      upserted: result.upserted,
+      error: result.status === "error" ? result.error : null,
+      finished_at: new Date().toISOString(),
+    })
+    .eq("id", syncRunId);
+  if (error) writeError("fin de synchro", error);
 }

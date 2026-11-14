@@ -27,7 +27,7 @@ export default function JournalPage() {
 
 async function Entries() {
   await connection();
-  const entries = getSessions(todayInParis())
+  const entries = (await getSessions(todayInParis()))
     .filter((s) => s.journal)
     .reverse();
 

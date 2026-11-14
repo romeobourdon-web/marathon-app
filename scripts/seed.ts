@@ -129,7 +129,8 @@ async function main() {
           moving_time_s: actual.durationSec,
           elapsed_time_s: actual.durationSec,
           avg_hr: actual.avgHr,
-          avg_speed_mps: Math.round(((actual.distanceKm * 1000) / actual.durationSec) * 1000) / 1000,
+          // Vitesse issue de l'allure moyenne du mock : relue en base, elle redonne exactement la même allure.
+          avg_speed_mps: 1000 / actual.avgPace,
         }),
       ),
     );
@@ -142,8 +143,10 @@ async function main() {
     );
     await insert(
       "journal_entry",
-      past.map(({ s, journal }) =>
-        owned({ activity_id: activityIdBySource.get(s.id), feeling: journal.feeling, rpe: journal.rpe, comment: journal.note }),
+      past.flatMap(({ s, journal }) =>
+        journal
+          ? [owned({ activity_id: activityIdBySource.get(s.id), feeling: journal.feeling, rpe: journal.rpe, comment: journal.note })]
+          : [],
       ),
     );
   }

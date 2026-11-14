@@ -22,8 +22,8 @@ export default function PlanPage() {
 async function Plan() {
   await connection();
   const today = todayInParis();
-  const planStart = getPlanStart();
-  const sessions = getSessions(today);
+  const planStart = await getPlanStart();
+  const sessions = await getSessions(today);
   const cw = currentWeek(planStart, today);
 
   return (

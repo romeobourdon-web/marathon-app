@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { BottomNav, type BottomNavItem } from "@/components/ui/bottom-nav";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -62,12 +62,20 @@ function Variant({ name, children }: { name: string; children: ReactNode }) {
 }
 
 export default function DesignPage() {
+  return (
+    <Suspense fallback={null}>
+      <DesignContent />
+    </Suspense>
+  );
+}
+
+async function DesignContent() {
   const demo = getDesignPreview();
-  const race = getRace();
+  const race = await getRace();
   const today = demo.today;
 
   // Bandeau : semaine et compte à rebours calculés par planner/ (date du jour fictive).
-  const week = currentWeek(getPlanStart(), today);
+  const week = currentWeek(await getPlanStart(), today);
   const countdown = daysToRace(today, race.date);
 
   // Séances
