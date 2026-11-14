@@ -4,16 +4,21 @@
 // Node 24 exécute le TypeScript directement (suppression des types) ; ce hook ne fait que résoudre les chemins.
 // Usage : node --import ./scripts/register-paths.mjs scripts/seed.ts
 
-import { existsSync } from "node:fs";
+import { statSync } from "node:fs";
 import { registerHooks } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const SRC = fileURLToPath(new URL("../src/", import.meta.url));
+// Code du projet uniquement : les imports internes de node_modules sont laissés à Node.
+const PROJECT_DIRS = [new URL("../src/", import.meta.url).href, new URL("./", import.meta.url).href];
+const inProject = (url) => typeof url === "string" && PROJECT_DIRS.some((dir) => url.startsWith(dir));
 const EXTENSIONS = [".ts", ".tsx", "/index.ts"];
 
+const isFile = (path) => statSync(path, { throwIfNoEntry: false })?.isFile() ?? false;
+
 function withExtension(path) {
-  if (existsSync(path) && !path.endsWith("/")) return path;
-  for (const ext of EXTENSIONS) if (existsSync(path + ext)) return path + ext;
+  if (isFile(path)) return path;
+  for (const ext of EXTENSIONS) if (isFile(path + ext)) return path + ext;
   return null;
 }
 
@@ -23,7 +28,7 @@ registerHooks({
       const file = withExtension(SRC + specifier.slice(2));
       if (file) return nextResolve(pathToFileURL(file).href, context);
     }
-    if ((specifier.startsWith("./") || specifier.startsWith("../")) && context.parentURL?.startsWith("file:")) {
+    if ((specifier.startsWith("./") || specifier.startsWith("../")) && inProject(context.parentURL)) {
       const file = withExtension(fileURLToPath(new URL(specifier, context.parentURL)));
       if (file) return nextResolve(pathToFileURL(file).href, context);
     }

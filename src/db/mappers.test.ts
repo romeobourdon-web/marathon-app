@@ -49,6 +49,7 @@ describe("toActivityResult", () => {
       session_link: [
         {
           activity: {
+            source: "garmin",
             start_time: "2026-10-06T07:00:00+00:00",
             distance_m: 8_400,
             moving_time_s: 2_772,
@@ -68,6 +69,7 @@ describe("toActivityResult", () => {
 
   it("garde la première activité de la journée et tolère un journal absent", () => {
     const activity = (start: string, d: number) => ({
+      source: "garmin",
       start_time: start,
       distance_m: d,
       moving_time_s: 1_800,
@@ -84,5 +86,26 @@ describe("toActivityResult", () => {
       expect(r.actual.distanceKm).toBe(6);
       expect(r.journal).toBeUndefined();
     }
+  });
+
+  it("ignore le réalisé fictif quand de vraies activités existent", () => {
+    const mockLinked: PlannedSessionRow = {
+      ...row,
+      session_link: [
+        {
+          activity: {
+            source: "mock",
+            start_time: "2026-10-06T07:00:00+00:00",
+            distance_m: 8_000,
+            moving_time_s: 2_700,
+            avg_hr: 140,
+            avg_speed_mps: 3,
+            journal_entry: null,
+          },
+        },
+      ],
+    };
+    expect(toActivityResult(mockLinked).skipped).toBe(false);
+    expect(toActivityResult(mockLinked, { ignoreMock: true })).toEqual({ skipped: true });
   });
 });

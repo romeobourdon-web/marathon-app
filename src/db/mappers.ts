@@ -12,7 +12,7 @@ export type JournalRow = Pick<Tables<"journal_entry">, "feeling" | "rpe" | "comm
 
 export type LinkedActivityRow = Pick<
   Tables<"activity">,
-  "start_time" | "distance_m" | "moving_time_s" | "avg_hr" | "avg_speed_mps"
+  "source" | "start_time" | "distance_m" | "moving_time_s" | "avg_hr" | "avg_speed_mps"
 > & {
   // Relation 1–1 (activity_id UNIQUE) : PostgREST renvoie un objet, ou null.
   journal_entry: JournalRow | JournalRow[] | null;
@@ -62,11 +62,12 @@ function toJournal(j: JournalRow | JournalRow[] | null): JournalEntry | undefine
  * Réalisé d'une séance prévue, lu dans session_link. Sans activité liée → séance non faite
  * (le statut skipped / done / today reste décidé par planner/linkSessions).
  * Plusieurs activités liées (double footing) : la première de la journée.
+ * `ignoreMock` : les activités fictives (source = 'mock') sont ignorées dès que de vraies activités existent.
  */
-export function toActivityResult(r: PlannedSessionRow): ActivityResult {
+export function toActivityResult(r: PlannedSessionRow, options: { ignoreMock?: boolean } = {}): ActivityResult {
   const activities = r.session_link
     .map((l) => l.activity)
-    .filter((a): a is LinkedActivityRow => a !== null)
+    .filter((a): a is LinkedActivityRow => a !== null && !(options.ignoreMock && a.source === "mock"))
     .sort((a, b) => a.start_time.localeCompare(b.start_time));
   const a = activities[0];
   if (!a) return { skipped: true };

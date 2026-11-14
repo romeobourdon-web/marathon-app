@@ -41,7 +41,7 @@ const SESSION_SELECT = `
   id, date, week, type, title, details, distance_m, pace_min_s_km, pace_max_s_km, hr_min, hr_max,
   plan_phase (code),
   session_link (
-    activity (start_time, distance_m, moving_time_s, avg_hr, avg_speed_mps, journal_entry (feeling, rpe, comment))
+    activity (source, start_time, distance_m, moving_time_s, avg_hr, avg_speed_mps, journal_entry (feeling, rpe, comment))
   )
 `;
 
@@ -58,7 +58,11 @@ export async function getSessions(today: string): Promise<Session[]> {
     .returns<PlannedSessionRow[]>();
   if (error || !data) fail("séances", error);
 
-  const results = new Map(data.map((row) => [row.id, toActivityResult(row)]));
+  // Le réalisé fictif du seed (source = 'mock') n'est affiché que tant qu'aucune vraie activité n'est synchronisée.
+  const real = await supabase.from("activity").select("id", { count: "exact", head: true }).neq("source", "mock");
+  const ignoreMock = (real.count ?? 0) > 0;
+
+  const results = new Map(data.map((row) => [row.id, toActivityResult(row, { ignoreMock })]));
   return linkSessions(data.map(toPlannedSession), today, (s) => results.get(s.id) ?? { skipped: true });
 }
 
@@ -74,6 +78,44 @@ export async function signIn(email: string, password: string): Promise<boolean> 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   return !error;
+}
+
+// ── Lectures pour la synchro (scripts uniquement, client admin) ───────────────
+
+/** Identifiant de l'utilisateur local (D03 : un seul utilisateur). */
+export async function getUserIdByEmail(email: string): Promise<string> {
+  const { data, error } = await createSupabaseAdminClient().auth.admin.listUsers({ perPage: 1000 });
+  if (error) fail("utilisateurs", error);
+  const user = data.users.find((u) => u.email === email);
+  if (!user) throw new Error(`Utilisateur ${email} introuvable : lance npm run db:seed.`);
+  return user.id;
+}
+
+/** source_id des activités déjà en base pour une source. */
+export async function getActivitySourceIds(userId: string, source: SyncSource): Promise<Set<string>> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from("activity")
+    .select("source_id")
+    .eq("user_id", userId)
+    .eq("source", source)
+    .range(0, 9999);
+  if (error) fail("activités connues", error);
+  return new Set(data.map((a) => a.source_id));
+}
+
+/** Séances prévues du plan actif entre deux dates : date → id (une séance par jour au plus). */
+export async function getPlannedSessionIdsByDate(userId: string, from: string, to: string): Promise<Map<string, string>> {
+  const admin = createSupabaseAdminClient();
+  const plan = await admin.from("plan").select("id").eq("user_id", userId).eq("is_active", true).maybeSingle();
+  if (plan.error || !plan.data) fail("plan actif", plan.error);
+  const { data, error } = await admin
+    .from("planned_session")
+    .select("id, date")
+    .eq("plan_id", plan.data.id)
+    .gte("date", from)
+    .lte("date", to);
+  if (error) fail("séances prévues", error);
+  return new Map(data.map((s) => [s.date, s.id]));
 }
 
 // ── Écritures (synchro, scripts uniquement) ─────────────────────────────────
