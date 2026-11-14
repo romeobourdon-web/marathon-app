@@ -34,7 +34,7 @@ export function Nav() {
             <span className="grid size-8 place-items-center rounded-xl bg-accent text-white">
               <Icon d="M3 12h4l3-8 4 16 3-8h4" />
             </span>
-            <span className="font-display text-xl font-bold tracking-tight">Objectif 3h30</span>
+            <span className="font-display text-xl font-bold tracking-tight">Target 42</span>
           </Link>
           <nav className="hidden gap-1 md:flex" aria-label="Navigation principale">
             {LINKS.map((l) => (

@@ -17,8 +17,8 @@ const mono = Fragment_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Objectif 3h30",
-  description: "Suivi d'entraînement marathon — objectif sub 3h30 au printemps 2027.",
+  title: "Target 42",
+  description: "Target 42 — pilotage de la préparation marathon (Annecy, avril 2027, objectif sub 3h30).",
 };
 
 // Layout racine : uniquement <html> et <body>. Les écrans du prototype ont leur layout dans (prototype)/.

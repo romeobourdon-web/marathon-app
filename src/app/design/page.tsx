@@ -28,7 +28,7 @@ import { currentWeek, daysToRace } from "@/planner/calendar";
 
 export const metadata: Metadata = {
   title: "Design system — Target 42",
-  description: "Aperçu des composants du design system v1 (DESIGN.md).",
+  description: "Aperçu des composants du design system v2 (DESIGN.md).",
 };
 
 const DAY_NAMES = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
@@ -110,7 +110,7 @@ async function DesignContent() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-12 px-5 pt-8 pb-12">
       <header className="flex flex-col gap-2">
-        <p className="text-label text-text-muted">Target 42 · design system v1</p>
+        <p className="text-label text-text-muted">Target 42 · design system v2</p>
         <h1 className="text-title-lg text-text">Composants</h1>
         <p className="text-body-sm text-text-muted">
           Aperçu de DESIGN.md §4. Les valeurs marquées « démo » sont fictives (D16).
