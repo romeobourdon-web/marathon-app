@@ -101,9 +101,15 @@ export function formatDurationApprox(totalSeconds: number): string {
   return h > 0 ? `≈${NBSP}${h}${NBSP}h${NBSP}${m.toString().padStart(2, "0")}` : `≈${NBSP}${m}${NBSP}min`;
 }
 
+/** 25 600 m → { value: "25,6", unit: "km" } : pour un chiffre héros dont l'unité est stylée à part */
+export function formatDistanceParts(meters: number, digits = 1): { value: string; unit: string } {
+  return { value: frNumber(meters / 1000, digits), unit: "km" };
+}
+
 /** 25 600 m → "25,6 km" (mètres en entrée, mesure brute) */
 export function formatDistance(meters: number, digits = 1): string {
-  return `${frNumber(meters / 1000, digits)}${NBSP}km`;
+  const { value, unit } = formatDistanceParts(meters, digits);
+  return `${value}${NBSP}${unit}`;
 }
 
 /** 5 → "+5" ; −0,6 → "−0,6" ; 0 → "0" (écart signé, vrai signe moins) */

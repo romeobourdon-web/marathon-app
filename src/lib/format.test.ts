@@ -3,6 +3,7 @@ import {
   formatClock,
   formatDate,
   formatDistance,
+  formatDistanceParts,
   formatDurationApprox,
   formatPacePerKm,
   formatSignedDelta,
@@ -44,6 +45,12 @@ describe("formatDistance", () => {
     expect(formatDistance(25_600)).toBe(`25,6${NBSP}km`);
     expect(formatDistance(42_195, 2)).toBe(`42,20${NBSP}km`);
     expect(formatDistance(10_000)).toBe(`10,0${NBSP}km`);
+  });
+});
+
+describe("formatDistanceParts", () => {
+  it("sépare la valeur et l'unité", () => {
+    expect(formatDistanceParts(12_400)).toEqual({ value: "12,4", unit: "km" });
   });
 });
 
