@@ -102,7 +102,7 @@ Lis docs/ARCHITECTURE.md (connectors/, scripts/), docs/GARMIN.md et docs/DECISIO
 2. Crée src/connectors/garmin/ : gestion du token (un nouveau token quand il expire, 24 h), appels et conversion Garmin → types neutres. Tests de conversion sur des données JSON anonymisées tirées de samples/ (pas de GPS réel dans les tests).
 3. Si les séries temporelles n'existent qu'en FIT, propose une dépendance de lecture FIT (de préférence le SDK officiel Garmin) et attends ma validation.
 4. Commande npm run sync [--from AAAA-MM-JJ] (scripts/sync.ts) : elle ouvre une entrée sync_run, récupère les données, fait les upserts via le repository, lie automatiquement chaque activité à la séance prévue du même jour et ferme l'entrée sync_run (succès ou erreur).
-5. L'import initial part du 21/09/2026 (début du plan).
+5. L'import initial part du 2026-04-04 (lancement du Défi, constante PROJECT_START).
 ```
 **Fin :** `npm run sync` importe les vraies activités. Une **2ᵉ exécution n'ajoute aucun doublon**. Une entrée `sync_run` est en succès. L'app affiche le réalisé réel. Lint, build et tests passent.
 

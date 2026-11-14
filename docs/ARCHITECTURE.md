@@ -68,7 +68,7 @@ planned_session   id · plan_id → plan · phase_id → plan_phase · date · w
                   · origin (generator|manual|coach) · updated_at
 
 ── Réalisé (source : Garmin, D13) ─────────────────────
-activity          id · source (garmin|fit_file|mock) · source_id · UNIQUE(source, source_id)
+activity          id · source (garmin|fit_file|manual|mock) · source_id · UNIQUE(source, source_id)
                   · start_time timestamptz · local_date · sport · distance_m · moving_time_s · elapsed_time_s
                   · avg_hr · max_hr · avg_speed_mps · elevation_gain_m · raw jsonb
 activity_stream   activity_id PK → activity · time_s[] · distance_m[] · hr[] · speed_mps[] · altitude_m[] · cadence[] · lat[] · lng[]

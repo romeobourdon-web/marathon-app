@@ -20,11 +20,12 @@ Marathon : Annecy, avril 2027 (date à confirmer). Départ à l'EPFL : 16 févri
 - [x] Restructuration selon ARCHITECTURE.md
 - [x] `src/engine/` créé dès maintenant : calculs sortis de l'UI + tests (vitest)
 - [x] Source de données tranchée : Garmin Personal API (D13), schéma V1 (D14)
-- [ ] M1 — Sonde Garmin → `docs/GARMIN.md` (D15), puis retour au QG
+- [x] M1 — Sonde Garmin → `docs/GARMIN.md` (D15), puis retour au QG
 - [ ] M2 — Supabase local
 - [ ] M3 — Migrations du schéma V1 + seed (référence, plan généré, données fictives)
 - [ ] M4 — Repository branché sur Supabase + connexion
 - [ ] M5 — Connecteur Garmin + `npm run sync` : import des vraies activités
+- [ ] Rattrapage des sorties faites au téléphone depuis le 2026-04-04 (D18)
 - [ ] M6 — Design system v1 (tokens, polices, 11 composants, page `/design`)
 
 Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
