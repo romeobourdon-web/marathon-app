@@ -3,6 +3,7 @@
 
 import type { Race } from "@/db/types";
 import { mockActivity } from "@/db/seed/mock/activity";
+import { DESIGN_PREVIEW } from "@/db/seed/mock/design";
 import { PLAN_START, RACE, ZONES } from "@/db/seed/reference";
 import { buildPlan } from "@/planner/plan";
 import { linkSessions } from "@/planner/sessions";
@@ -24,4 +25,9 @@ export function getPlanStart(): string {
 /** Toutes les séances du plan, liées au réalisé à la date `today`. */
 export function getSessions(today: string): Session[] {
   return linkSessions(PLANNED_SESSIONS, today, mockActivity);
+}
+
+/** Données fictives de la page /design (D16) : toujours affichées avec un Chip « démo ». */
+export function getDesignPreview() {
+  return DESIGN_PREVIEW;
 }
