@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# échantillons bruts de l API Garmin (traces GPS) — jamais commités (D15)
+/samples/
