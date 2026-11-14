@@ -138,4 +138,4 @@ Le design va bouger. Pour qu'il reste cohérent :
 
 | Version | Date | Changement |
 |---|---|---|
-| v1 | 2026-11-13 | Direction « Lac » (C) retenue avec le bandeau de B. Palette Ardoise, Schibsted Grotesk + Fragment Mono, nom Target 42, 11 composants. |
+| v1 | 2026-11-13 | Direction « Lac » (C) retenue avec le bandeau de B. Palette Ardoise, Schibsted Grotesk + Fragment Mono, nom Target 42, 12 composants. |
