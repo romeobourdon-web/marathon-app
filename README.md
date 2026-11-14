@@ -3,17 +3,13 @@
 App web perso de pilotage d'une préparation marathon (Défi G1-G2, Centrale Lille).
 Specs et décisions : voir [`docs/`](docs/) et [`CLAUDE.md`](CLAUDE.md).
 
-## Lancer l'app
+## Démarrer en local
 
-```bash
-cd "/Users/romeo/Desktop/Centrale G1/DEFI G1G2/Application marathon"
-npm install   # la première fois seulement
-npm run dev
-```
-
-Ouvre ensuite http://localhost:3000. `Ctrl + C` dans le terminal pour arrêter.
-
-Autres commandes : `npm run lint`, `npm run build`, `npm test`.
+1. Ouvrir Docker Desktop, puis dans le dossier du projet : `npm install` (la première fois seulement).
+2. `npm run db:start` : démarre Supabase en local (Studio : http://localhost:54323).
+3. Compléter `.env.local` avec les variables listées dans `.env.example` (valeurs : `npm run db:status`).
+4. `npm run dev`, puis ouvrir http://localhost:3000 (`Ctrl + C` pour arrêter).
+5. Autres commandes : `npm run db:stop`, `npm run db:reset`, `npm run lint`, `npm run build`, `npm test`.
 
 ## Structure
 
