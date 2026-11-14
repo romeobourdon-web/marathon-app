@@ -32,6 +32,7 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 
 ## Phase 2 — Utile (mi-déc.)
 - [ ] `npm run db:backup` + `db:seed --mock` (D22, D23)
+- [ ] Connexion automatique en local, `/login` masqué (D26)
 - [ ] Calendrier : prévu / réalisé / écarts
 - [ ] Historique des activités + détail d'une séance
 - [ ] Questionnaire du matin + journal après séance (mobile) : commentaire libre juste après la séance, pré-rempli avec le ressenti saisi sur la montre ; aussi pour une séance prévue non faite (D20)
@@ -46,6 +47,7 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 - [ ] Analyse IA de chaque séance : données + journal (`session_analysis`, D20)
 
 ## Phase 4 — En ligne et mobile (fin janv.)
+- [ ] Écran de connexion réel (e-mail + mot de passe), obligatoire avant la mise en ligne (D26)
 - [ ] Déploiement Vercel + Supabase cloud
 - [ ] Synchro Garmin automatique (tâche planifiée) + bouton « Synchroniser »
 - [ ] PWA installable
