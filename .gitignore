@@ -43,3 +43,6 @@ next-env.d.ts
 
 # échantillons bruts de l API Garmin (traces GPS) — jamais commités (D15)
 /samples/
+
+# sauvegardes de la base locale (données réelles, D23) — jamais commitées
+/backups/
