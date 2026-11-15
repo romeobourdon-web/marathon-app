@@ -61,7 +61,7 @@ function toJournal(j: JournalRow | JournalRow[] | null): JournalEntry | undefine
 
 /**
  * Réalisé d'une séance prévue, lu dans session_link. Sans activité liée → séance non faite
- * (le statut skipped / done / today reste décidé par planner/linkSessions).
+ * (le statut done / skipped / today / upcoming reste décidé par planner/linkSessions).
  * Plusieurs activités liées (double sortie) : agrégées par engine/combineActivities (D28) ;
  * le journal est celui de la première activité qui en a un.
  * `ignoreMock` : les activités fictives (source = 'mock') sont ignorées dès que de vraies activités existent.

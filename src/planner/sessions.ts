@@ -4,8 +4,10 @@ import type { ActivityResult } from "@/db/types";
 import type { PlannedSession, Session } from "@/planner/types";
 
 /**
- * Associe chaque séance prévue à son réalisé. `activityFor` n'est appelée que
- * pour les séances passées (avant `today`).
+ * Statut de chaque séance prévue à la date `today`, à partir de son réalisé (`activityFor`) :
+ *  - une séance liée à une activité est « done », quelle que soit sa date (D28 : une sortie de la veille
+ *    peut réaliser la séance du jour ou du lendemain) ;
+ *  - sinon : passée → « skipped », aujourd'hui → « today », à venir → « upcoming ».
  */
 export function linkSessions(
   planned: PlannedSession[],
@@ -13,11 +15,11 @@ export function linkSessions(
   activityFor: (s: PlannedSession) => ActivityResult,
 ): Session[] {
   return planned.map((s) => {
-    if (s.date > today) return { ...s, status: "upcoming" };
-    if (s.date === today) return { ...s, status: "today" };
     const result = activityFor(s);
-    if (result.skipped) return { ...s, status: "skipped" };
-    return { ...s, status: "done", actual: result.actual, journal: result.journal };
+    if (!result.skipped) return { ...s, status: "done", actual: result.actual, journal: result.journal };
+    if (s.date < today) return { ...s, status: "skipped" };
+    if (s.date === today) return { ...s, status: "today" };
+    return { ...s, status: "upcoming" };
   });
 }
 
