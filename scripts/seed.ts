@@ -1,11 +1,12 @@
 /**
  * Données de départ de la base locale (mission M3, D11).
- * Lancement : npm run db:seed (après npm run db:reset).
+ * Lancement : npm run db:seed (après npm run db:reset), ou npm run db:seed -- --mock pour ajouter du réalisé fictif.
  *
  * 1. Crée l'utilisateur local (SEED_USER_EMAIL / SEED_USER_PASSWORD de .env.local) via l'API admin.
  * 2. Insère le profil et l'événement depuis src/db/seed/reference.ts.
  * 3. Génère le plan avec planner/buildPlan et l'insère : ensuite, c'est la base qui fait foi (D11).
- * 4. Ajoute le réalisé fictif de seed/mock/ (source = 'mock') pour les séances passées, avec liaison et journal.
+ * 4. Seulement avec --mock (D22) : ajoute le réalisé fictif de seed/mock/ (source = 'mock') pour les séances passées,
+ *    avec liaison et journal. Jamais dans la base réelle : un chiffre fictif ne doit pas se mêler aux vrais (D04).
  *
  * Aucune dépendance : fetch vers l'API REST et l'API d'authentification de Supabase local, avec la clé secrète.
  * Pas de logique métier ici : le script orchestre reference, planner et mock.
@@ -108,8 +109,9 @@ async function main() {
   // Une séance prévue par jour au plus : la date identifie la ligne insérée.
   const sessionIdByDate = new Map(sessionRows.map((r) => [r.date, r.id]));
 
-  // Réalisé fictif (seed/mock/) pour les séances passées, comme le faisait linkSessions.
-  const past = planned
+  // Réalisé fictif (seed/mock/) pour les séances passées, uniquement avec --mock (D22).
+  const withMock = process.argv.includes("--mock");
+  const past = (withMock ? planned : [])
     .filter((s) => s.date < today)
     .map((s) => ({ s, result: mockActivity(s) }))
     .flatMap(({ s, result }) => (result.skipped ? [] : [{ s, actual: result.actual, journal: result.journal }]));
@@ -154,7 +156,11 @@ async function main() {
   const weeks = new Set(planned.map((s) => s.week)).size;
   console.log(`Utilisateur local créé (identifiants dans .env.local).`);
   console.log(`Plan : ${phases.length} phases, ${sessionRows.length} séances prévues sur ${weeks} semaines.`);
-  console.log(`Réalisé fictif (source = 'mock') au ${today} : ${activities.length} activités liées, avec journal.`);
+  console.log(
+    withMock
+      ? `Réalisé fictif (source = 'mock') au ${today} : ${activities.length} activités liées, avec journal.`
+      : "Aucune donnée fictive (ajouter --mock pour en insérer).",
+  );
 }
 
 main().catch((e: unknown) => {
