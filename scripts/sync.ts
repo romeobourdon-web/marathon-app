@@ -14,6 +14,7 @@ import type { Json } from "@/db/database.types";
 import {
   finishSyncRun,
   getActivitySourceIds,
+  deleteLinks,
   getLinkState,
   getUserIdByEmail,
   linkSession,
@@ -27,7 +28,7 @@ import {
 import { PROJECT_START } from "@/db/seed/reference";
 import { countsForPlan } from "@/engine/activity";
 import { addDays, todayInParis } from "@/lib/dates";
-import { autoLinks } from "@/planner/link";
+import { computeAutoLinks, diffLinks } from "@/planner/link";
 
 function parseFrom(argv: string[]): string {
   const i = argv.indexOf("--from");
@@ -123,16 +124,23 @@ async function main() {
     );
     console.log(`Bien-être : ${wellness.length} jours.`);
 
-    // 4. Liaison automatique (D28) : le jour même, sinon une séance non liée à ± 1 jour (la plus proche en distance).
-    //    Seules les courses qui comptent pour le plan sont liées (D22 : pas d'autre sport ; D28 : pas de marche).
-    //    Fenêtre élargie d'un jour de chaque côté ; les liaisons existantes ne sont jamais modifiées.
+    // 4. Liaisons automatiques recalculées (D28, D29) : le jour même d'abord, sinon une séance libre à ± 1 jour
+    //    si l'activité fait ≥ 50 % du prévu. Seules les courses qui comptent pour le plan sont liées.
+    //    Les liaisons manuelles ne sont jamais modifiées. Fenêtre élargie d'un jour de chaque côté.
     const state = await getLinkState(userId, addDays(from, -1), addDays(to, 1));
-    const newLinks = autoLinks(
+    const manual = state.links.filter((l) => l.method === "manual");
+    const desired = computeAutoLinks(
       state.sessions,
       state.activities.map((a) => ({ ...a, eligible: countsForPlan(a, state.planStart) })),
+      manual,
     );
-    for (const l of newLinks) await linkSession(userId, l.sessionId, l.activityId, "auto");
-    console.log(`Liaisons prévu ↔ réalisé : ${newLinks.length} nouvelles.`);
+    const { toDelete, toInsert } = diffLinks(
+      state.links.filter((l) => l.method === "auto"),
+      desired,
+    );
+    await deleteLinks(toDelete.map((l) => l.id));
+    for (const l of toInsert) await linkSession(userId, l.sessionId, l.activityId, "auto");
+    console.log(`Liaisons prévu ↔ réalisé : ${toInsert.length} créées, ${toDelete.length} supprimées (manuelles intactes : ${manual.length}).`);
 
     await finishSyncRun(runId, { status: "success", upserted });
     console.log(`Synchro terminée : ${upserted} lignes écrites.`);

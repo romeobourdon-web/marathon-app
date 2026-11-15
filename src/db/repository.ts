@@ -123,13 +123,15 @@ export async function getActivitySourceIds(userId: string, source: SyncSource): 
 export interface LinkState {
   /** Début du plan actif (la base fait foi, D11). */
   planStart: string;
-  sessions: { id: string; date: string; distanceKm: number; linked: boolean }[];
-  activities: (ActivityRecord & { linked: boolean })[];
+  sessions: { id: string; date: string; distanceKm: number }[];
+  activities: ActivityRecord[];
+  /** Liaisons existantes dont l'activité est dans la fenêtre, avec leur méthode (auto | manual). */
+  links: { id: string; activityId: string; sessionId: string; method: "auto" | "manual" }[];
 }
 
 /**
- * État de la liaison prévu ↔ réalisé entre deux dates (incluses) : séances du plan actif et activités garmin,
- * chacune avec un indicateur « déjà liée ». Sert à planner/autoLinks (D28).
+ * État de la liaison prévu ↔ réalisé entre deux dates (incluses) : séances du plan actif, activités garmin
+ * et liaisons existantes. Sert à planner/computeAutoLinks (D28, D29).
  */
 export async function getLinkState(userId: string, from: string, to: string): Promise<LinkState> {
   const admin = createSupabaseAdminClient();
@@ -137,14 +139,14 @@ export async function getLinkState(userId: string, from: string, to: string): Pr
   if (plan.error || !plan.data) fail("plan actif", plan.error);
   const sessions = await admin
     .from("planned_session")
-    .select("id, date, distance_m, session_link (id)")
+    .select("id, date, distance_m")
     .eq("plan_id", plan.data.id)
     .gte("date", from)
     .lte("date", to);
   if (sessions.error) fail("séances prévues", sessions.error);
   const activities = await admin
     .from("activity")
-    .select("id, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, session_link (id)")
+    .select("id, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, session_link (id, planned_session_id, method)")
     .eq("user_id", userId)
     .eq("source", "garmin")
     .gte("local_date", from)
@@ -153,8 +155,16 @@ export async function getLinkState(userId: string, from: string, to: string): Pr
   if (activities.error) fail("activités", activities.error);
   return {
     planStart: plan.data.start_date,
-    sessions: sessions.data.map((s) => ({ id: s.id, date: s.date, distanceKm: s.distance_m / 1000, linked: s.session_link.length > 0 })),
-    activities: activities.data.map((a) => ({ ...toActivityRecord(a), linked: asList(a.session_link).length > 0 })),
+    sessions: sessions.data.map((s) => ({ id: s.id, date: s.date, distanceKm: s.distance_m / 1000 })),
+    activities: activities.data.map(toActivityRecord),
+    links: activities.data.flatMap((a) =>
+      asList(a.session_link).map((l) => ({
+        id: l.id,
+        activityId: a.id,
+        sessionId: l.planned_session_id,
+        method: l.method as "auto" | "manual",
+      })),
+    ),
   };
 }
 
@@ -229,6 +239,13 @@ export async function linkSession(
       { onConflict: "activity_id", ignoreDuplicates: true },
     );
   if (error) writeError("liaison", error);
+}
+
+/** Supprime des liaisons (recalcul des liaisons automatiques, D29). Les liaisons manuelles ne sont jamais passées ici. */
+export async function deleteLinks(linkIds: string[]): Promise<void> {
+  if (linkIds.length === 0) return;
+  const { error } = await createSupabaseAdminClient().from("session_link").delete().in("id", linkIds).eq("method", "auto");
+  if (error) writeError("suppression de liaisons", error);
 }
 
 /** Ouvre une entrée sync_run (statut running) et renvoie son id. */

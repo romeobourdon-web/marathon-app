@@ -1,16 +1,19 @@
-// Liaison automatique prévu ↔ réalisé (D28) :
-//  1. le jour même : chaque course éligible est liée à la séance prévue de sa date (plusieurs activités possibles) ;
-//  2. sinon : une séance prévue NON liée à ± 1 jour, la plus proche en distance.
+// Liaison automatique prévu ↔ réalisé (D28, D29) :
+//  1. le jour même : chaque course éligible est liée à la séance prévue de sa date (plusieurs activités possibles, agrégées) ;
+//  2. sinon : une séance prévue NON liée à ± 1 jour, la plus proche en distance, à condition que l'activité
+//     fasse au moins 50 % de la distance prévue (D29).
 // Seules les courses éligibles au plan sont liées (D22 : pas d'autre sport ; D28 : pas de marche).
+// Les liaisons automatiques sont recalculées entièrement à chaque synchro ; les liaisons manuelles ne bougent jamais (D29).
 
 import { daysBetween } from "@/lib/dates";
+
+/** Part minimale de la distance prévue pour une liaison à ± 1 jour (D29). */
+export const NEIGHBOUR_MIN_SHARE = 0.5;
 
 export interface LinkableSession {
   id: string;
   date: string;
   distanceKm: number;
-  /** Déjà liée à au moins une activité (avant ce passage). */
-  linked: boolean;
 }
 
 export interface LinkableActivity {
@@ -20,43 +23,61 @@ export interface LinkableActivity {
   distanceKm: number;
   /** Course qui compte pour le plan (engine/activity.countsForPlan). */
   eligible: boolean;
-  /** Déjà liée à une séance. */
-  linked: boolean;
 }
 
-export interface AutoLink {
+export interface LinkPair {
   activityId: string;
   sessionId: string;
 }
 
-/** Nouvelles liaisons à créer ; les liaisons existantes ne sont jamais modifiées. */
-export function autoLinks(sessions: LinkableSession[], activities: LinkableActivity[]): AutoLink[] {
-  const links: AutoLink[] = [];
-  const linkedSessions = new Set(sessions.filter((s) => s.linked).map((s) => s.id));
+/**
+ * Liaisons automatiques souhaitées, recalculées de zéro.
+ * `manual` : liaisons manuelles existantes, figées ; leurs activités et leurs séances ne sont pas réattribuées.
+ */
+export function computeAutoLinks(sessions: LinkableSession[], activities: LinkableActivity[], manual: LinkPair[] = []): LinkPair[] {
+  const links: LinkPair[] = [];
+  const manualActivities = new Set(manual.map((l) => l.activityId));
+  const takenSessions = new Set(manual.map((l) => l.sessionId));
   const sessionByDate = new Map(sessions.map((s) => [s.date, s]));
   const pending = activities
-    .filter((a) => a.eligible && !a.linked)
+    .filter((a) => a.eligible && !manualActivities.has(a.id))
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  // 1. Le jour même
+  // 1. Le jour même : toute course compte (prioritaire sur une liaison à ± 1 jour, D29)
   const remaining: LinkableActivity[] = [];
   for (const a of pending) {
     const s = sessionByDate.get(a.date);
     if (s) {
       links.push({ activityId: a.id, sessionId: s.id });
-      linkedSessions.add(s.id);
+      takenSessions.add(s.id);
     } else {
       remaining.push(a);
     }
   }
 
-  // 2. Une séance non liée à ± 1 jour, la plus proche en distance
+  // 2. Une séance non liée à ± 1 jour, assez proche en distance (≥ 50 % du prévu), la plus proche
   for (const a of remaining) {
-    const candidates = sessions.filter((s) => !linkedSessions.has(s.id) && Math.abs(daysBetween(a.date, s.date)) === 1);
+    const candidates = sessions.filter(
+      (s) =>
+        !takenSessions.has(s.id) &&
+        Math.abs(daysBetween(a.date, s.date)) === 1 &&
+        a.distanceKm >= NEIGHBOUR_MIN_SHARE * s.distanceKm,
+    );
     if (candidates.length === 0) continue;
     const best = candidates.reduce((x, y) => (Math.abs(y.distanceKm - a.distanceKm) < Math.abs(x.distanceKm - a.distanceKm) ? y : x));
     links.push({ activityId: a.id, sessionId: best.id });
-    linkedSessions.add(best.id);
+    takenSessions.add(best.id);
   }
   return links;
+}
+
+/** Différence entre les liaisons automatiques existantes et celles souhaitées. */
+export function diffLinks<T extends LinkPair>(existingAuto: T[], desired: LinkPair[]): { toDelete: T[]; toInsert: LinkPair[] } {
+  const key = (l: LinkPair) => `${l.activityId}→${l.sessionId}`;
+  const desiredKeys = new Set(desired.map(key));
+  const existingKeys = new Set(existingAuto.map(key));
+  return {
+    toDelete: existingAuto.filter((l) => !desiredKeys.has(key(l))),
+    toInsert: desired.filter((l) => !existingKeys.has(key(l))),
+  };
 }
