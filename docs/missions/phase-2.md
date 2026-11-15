@@ -23,7 +23,7 @@ Mission P2-M2. Lis D28 et D29 dans docs/DECISIONS.md.
 ## P2-M3 — Design system v2.1 « Corail » · Opus
 
 ```
-Mission P2-M3. Lis docs/DESIGN.md (v2.1) en entier, D24, D25, D27.
+Mission P2-M3. Lis docs/DESIGN.md (v2.1) en entier, D24, D25, D27. Référence visuelle exacte : docs/maquettes/t42-reference.css et docs/maquettes/Today-*.html (chiffres fictifs, ne pas les recopier).
 1. globals.css : remplace les valeurs v1 par les tokens v2.1 (§4), mêmes noms ; ajoute les tokens marqués +, renomme --font-mono → --font-display. Ombres, mouvement, tailles, rayons.
 2. Polices : Barlow (400-700) et Barlow Condensed (600, 700) via next/font/google ; retire Schibsted Grotesk et Fragment Mono.
 3. Les 12 composants de src/components/ui/ prennent l'aspect v2.1 (§5) sans changer leurs props existantes ; ajoute les variantes v2.1 (Chip off/demo, Button toggle, Stat compare, zone visée de TrendChart line) et le 13e composant PhaseTimeline. Chaque composant est responsive par lui-même (390 px et ≥ 1024 px).
@@ -37,4 +37,4 @@ Mission P2-M3. Lis docs/DESIGN.md (v2.1) en entier, D24, D25, D27.
 
 ## P2-M4 — Écran Aujourd'hui · Opus
 
-À préparer au QG après P2-M3 (maquettes Today-390 / Today-1280 à fournir à Claude Code).
+À préparer au QG après P2-M3. Maquettes : docs/maquettes/Today-390.html et Today-1280.html.
