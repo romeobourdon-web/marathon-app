@@ -1,9 +1,10 @@
 # Design — Target 42
 
-Statut : ✅ validé (2026-11-14, D24). Version du design system : **v2 « Corail »**. Remplace la v1 « Ardoise ».
+Statut : ✅ validé (2026-11-14, D24). Version du design system : **v2.1 « Corail »**. Remplace la v1 « Ardoise ».
 
-- **Référence visuelle v2** : le prototype v0 (tag `v0-prototype`, écran `/`) affiné selon ce fichier, puis la page `/design` une fois migrée.
-- Les artefacts v1 (design system « Ardoise » et canvas des maquettes) sont **obsolètes** jusqu'à leur mise à jour en v2.
+- **Design system v2** (tokens, 13 composants avec aperçus, règles) : https://claude.ai/artifact/CRSHiW5EfDsRmCWUer4BiV
+- **Maquettes v2** (13 écrans, 390 et 1280 px, une page par écran) : https://claude.ai/artifact/S5cnCpt4iKuFp9xRib8zcG
+- Le canvas des maquettes v1 « Ardoise » (https://claude.ai/artifact/C7PqLDJb2yhV12B4kEuaM2) est **archivé**.
 - En cas de contradiction : **ce fichier fait foi pour le code**.
 
 ## 1. Intention
@@ -61,7 +62,7 @@ Noms identiques dans le CSS (`--<nom>`) et Tailwind. On reprend les noms v1 avec
 | **+** `accent-ink` | `#C2410C` | **Texte** accent, liens, fond du bouton principal, focus | 5,2:1 sur blanc, 4,6:1 sur `surface-raised` |
 | `accent-hover` | `#A8360A` | Survol / appui du bouton principal | — |
 | **+** `accent-soft` | `#FFEEE7` | Fond de tuile ou de badge accent | `accent-ink` dessus : 4,6:1 |
-| `on-accent` | `#FFFFFF` | Texte sur `accent-ink` ou sur le bandeau (sur `accent` : ≥ 24 px ou icône seulement) | 5,2:1 sur `accent-ink` |
+| `on-accent` | `#FFFFFF` | Texte sur `accent-ink` (sur `accent` : ≥ 24 px ou icône seulement) | 5,2:1 sur `accent-ink` |
 | `good` / **+** `good-soft` | `#137535` / `#E7F6EC` | ✓ Dans les clous, conforme | 5,2:1 sur soft |
 | **+** `info` / `info-soft` | `#1D4ED8` / `#E8EEFC` | ↑ En avance | 5,8:1 sur soft |
 | `warn` / **+** `warn-soft` | `#A84D08` / `#FDF1E2` | ! En retard, ✕ non réalisée, écart | 5,1:1 sur soft |
@@ -72,6 +73,7 @@ Noms identiques dans le CSS (`--<nom>`) et Tailwind. On reprend les noms v1 avec
 | `focus-ring` | = `accent-ink` | Anneau de focus 2 px, décalage 2 px | — |
 | **+** `hero-from` / `hero-to` | `#D04419` / `#A8360A` | Dégradé du bandeau (135°) | blanc dessus ≥ 4,6:1 |
 | **+** `hero-tile` | `rgba(0,0,0,0.14)` | Tuiles dans le bandeau | blanc dessus ≥ 5,9:1 |
+| **+** `on-hero` | `#FFFFFF` | Texte et barre de progression dans le bandeau (v2.1) | ≥ 4,6:1 sur le dégradé |
 
 Changements par rapport au prototype, pour passer le niveau AA :
 - `ink-3` `#78716C` → `text-subtle` `#6F6862` (était à 4,2:1 sur les tuiles) ;
@@ -118,43 +120,45 @@ Formats (`lib/format.ts`) : allure `5'30 /km`, durée `3:30:00`, distance `25,6 
 - Espacements : grille de 4 px inchangée (`space-1` 4 → `space-12` 48).
   **+** `page-x` : 16 px (téléphone) / 24 px (PC). **+** `card-pad` : 20 / 24. **+** `grid-gap` : 16 / 20. **+** `container` : 1152 px.
 - Rayons : `radius-sm` **4** (haut des barres) · `radius-md` **16** (tuiles, champs, info-bulles) · `radius-lg` 24 (cartes, bandeau) · `radius-pill` 999 (badges, onglets, boutons).
-- Tailles : `touch-min` 44 · `control-height` **48** · `nav-height` 64 (onglets du téléphone) · **+** `header-height` 56 · `ring-size` 124 · **+** `day-dot` 36.
+- Tailles : `touch-min` 44 · `control-height` **48** · `nav-height` 64 (onglets du téléphone) · **+** `header-height` 56 · `ring-size` 124 · **+** `day-dot` 36. · **+** `sheet-width` 480 (panneau latéral PC, v2.1)
 - Bordures : `border-hairline` 1 px · `border-focus` 2 px · **+** `border-plan` 2 px (pointillés du prévu futur) · `stroke-chart` 2 px · `stroke-ring` 8 px.
 
 ### Mouvement
 
 150 ms (survol), 250 ms (apparition), `ease-out`. Une seule animation d'entrée : les barres des graphiques poussent depuis la base (700 ms, `cubic-bezier(0.22,1,0.36,1)`, décalage de 50 ms par barre). Tout est coupé si `prefers-reduced-motion`.
 
-## 5. Composants (12, dans `src/components/ui/`)
+## 5. Composants (13, dans `src/components/ui/`)
 
-On garde les composants v1 et leurs props. On change leur aspect selon le prototype. Ils sont responsive par eux-mêmes : aucun composant « mobile » ou « desktop » séparé.
+On garde les 12 composants v1 et leurs props, et on ajoute `PhaseTimeline` (v2.1). On change leur aspect selon le prototype. Ils sont responsive par eux-mêmes : aucun composant « mobile » ou « desktop » séparé.
 
 | Composant | Aspect v2 | Téléphone | PC |
 |---|---|---|---|
 | `Card` | Blanc, bordure `line`, `radius-lg`, `shadow-card`. En-tête : `eyebrow` à gauche, élément optionnel à droite (badge, unité) | padding 20 | padding 24 |
-| `Chip` | Badge pilule 12/700. Variantes : `neutral` (raised / muted), `quality` (accent-soft / accent-ink : fractionné, seuil, allure, course), `long` (text / blanc : sortie longue), `good` / `info` / `warn` / `alert` (soft + glyphe + mot) | identique | identique |
-| `Stat` | Valeur `num-lg` + unité (`title-sm`, `text-subtle`) + libellé `body-sm` dessous. Variante `tile` (fond `surface-raised` ou `accent-soft`, `radius-md`, valeur `num-md`) | tuiles en 3 colonnes, valeur réduite à 20 px si elle est longue (fourchette d'allure) | valeur pleine taille |
+| `Chip` | Badge pilule 12/700. Variantes : `neutral` (raised / muted), `quality` (accent-soft / accent-ink : fractionné, seuil, allure, course), `long` (text / blanc : sortie longue), `good` / `info` / `warn` / `alert` (soft + glyphe + mot). **v2.1** : `off` = « Hors plan » (contour `line-strong`, sorties avant le 21/09 ou autre sport, D22) ; `demo` = « démo » ou « exemple » (contour pointillé, D16) | identique | identique |
+| `Stat` | Valeur `num-lg` + unité (`title-sm`, `text-subtle`) + libellé `body-sm` dessous. Variante `tile` (fond `surface-raised` ou `accent-soft`, `radius-md`, valeur `num-md`) | **v2.1** variante `compare` (prévu / réalisé) : libellé en capitales 11 px, réalisé 24 px, « visé … » en `caption`, écart signé en `accent-ink`. Tuiles en 3 colonnes, valeur réduite à 20 px si elle est longue (fourchette d'allure) | valeur pleine taille |
 | `StatusBand` | **Le bandeau corail** : dégradé `hero-from`→`hero-to`, `shadow-hero`, courbe de profil décorative en blanc à 12 %. Contenu : course · date, `J-n`, « soit N semaines et J jours », tuiles Objectif + Allure cible (`hero-tile`), barre « Semaine n/30 · phase · % » | empilé, `num-hero` 88, hauteur ≤ 300 px pour laisser la séance du jour visible | une ligne : J-n à gauche (128), tuiles et barre à droite (≈ 384 px) |
-| `Button` | `primary` : `accent-ink` + blanc, survol `accent-hover`. `secondary` : blanc + bordure `line` + texte `text`. `ghost` : texte `accent-ink`. Pilule, hauteur 48 | pleine largeur dans les formulaires | largeur du contenu |
+| `Button` | `primary` : `accent-ink` + blanc, survol `accent-hover`. `secondary` : blanc + bordure `line` + texte `text`. `ghost` : texte `accent-ink`. **v2.1** `toggle` (filtres, `aria-pressed`, actif = fond `text`). Pilule, hauteur 48 | pleine largeur dans les formulaires | largeur du contenu |
 | `TextField` | Fond `surface-raised`, bordure `line-strong`, `radius-md`, 16 px min. Erreur : bordure et aide `alert` | pleine largeur | max 480 px |
 | `ScaleInput` | Échelle 1–5 nommée (remplace les emoji du prototype). Segments `surface-raised`, sélection `accent-ink` + blanc, mot sous la sélection (Épuisé · Difficile · Correct · Bien · Excellent). Variante 1–10 pour le RPE | segments ≥ 44 px, pleine largeur | segments 40 px |
 | `SessionCard` | Prévue : `Chip` de type, titre `title`, consigne `body`, 3 tuiles (distance / allure en `accent-soft` / FC), lien `accent-ink`. Réalisée : 3 colonnes « réalisé en grand, visé dessous, écart signé en `accent-ink` ». Non réalisée : `Chip warn` ✕. Repos : titre seul | tuiles en 3 colonnes, compactes | idem, plus aérées |
 | `ScoreCard` | Forme (démo D16) : jauge `stroke-ring` 8 en couleur d'état, valeur `num-xl` au centre, verdict + glyphe, 4 `Stat`, bouton « Questionnaire du matin » tant qu'il n'est pas rempli | jauge 124 | idem dans une carte de 2 colonnes sur 6 |
 | `WeekChart` | « Cette semaine » : `num-xl` réalisé / prévu, barre de progression (réalisé corail, repère vertical « prévu à date »), 2 `Stat`, 7 pastilles jour (faite = corail ✓, non réalisée = warn-soft ✕, prévue = pointillés, repos = raised ; aujourd'hui = anneau accent), statut de la semaine en `Chip` | pastilles 36 px | idem |
-| `TrendChart` | Variante `bars` (volume hebdo, comme le prototype) : prévu = aplat `plan` + liseré, réalisé = barre corail plus étroite, futur = pointillés, grille en tirets `line` avec 2 repères, axe S1…Sn, info-bulle `text` + blanc au survol/tap. Variante `line` (prédiction, allure dans le temps) : ligne `text` 2 px, cible en tirets `accent-ink` | 8 dernières semaines, info-bulle au tap | tout le plan (30 semaines), info-bulle au survol |
+| `TrendChart` | Variante `bars` (volume hebdo, comme le prototype) : prévu = aplat `plan` + liseré, réalisé = barre corail plus étroite, futur = pointillés, grille en tirets `line` avec 2 repères, axe S1…Sn, info-bulle `text` + blanc au survol/tap. Variante `line` (prédiction, allure dans le temps) : ligne `text` 2 px, cible ponctuelle en tirets `accent-ink` ; **zone visée** (allure, FC) = bande `surface-raised` bordée de tirets `plan-edge` ; axe d'allure inversé (plus rapide = plus haut) | 8 dernières semaines, info-bulle au tap | tout le plan (30 semaines), info-bulle au survol |
 | `BottomNav` → nav responsive | Téléphone : barre en bas, fond blanc à 95 % + flou, onglet actif en `accent-ink`. PC : pilules dans l'en-tête, active = `text` + blanc. Logo : carré `accent` + nom « Target 42 » en `title-sm` | 5 onglets icône + libellé | 5 pilules texte |
+| **+** `PhaseTimeline` (v2.1) | Frise des 4 phases (segments proportionnels 8 / 10 / 9 / 3 semaines, pilules) : passé = `text`, phase courante remplie en `accent`, futur = `surface-raised`, noms en `caption` (courante en `accent-ink`). Variante avec échéances : repères verticaux, course cible en `accent-ink`, aujourd'hui en `accent`. Justification : sert sur Plan et Échéances, rien d'existant ne montre la structure du plan | frise compacte en carte | pleine largeur, avec repères d'échéances |
 
 Pièces du prototype qui disparaissent au profit des composants ci-dessus : `components/ui.tsx` (Card, CardTitle, PageHeader, TypeBadge, WeekStatusPill, Stat), `components/nav.tsx`, `components/volume-chart.tsx`. `PageHeader` devient un style de titre d'écran (`title-lg` + `body` muted), sans nouveau composant.
 
 ## 6. Écrans : téléphone et PC
 
 ### Aujourd'hui (`/`)
+- Jour de repos : la carte devient « Prochaine séance » (date en `accent-ink`) avec un `Chip` « Aujourd'hui : repos ».
 - **Téléphone** (ordre = la promesse) : StatusBand compact → Séance du jour (`SessionCard`) → Forme (`ScoreCard`, avec le questionnaire) → Cette semaine (`WeekChart`) → Focus endurance (`Card` + `Stat` signé) → Tendance du volume (`TrendChart bars`, 8 semaines).
 - **PC** (grille 6 colonnes) : ligne 1, StatusBand (6). Ligne 2 : Séance du jour (2) · Forme (2) · Cette semaine (2). Ligne 3 : Tendance du volume (4) · Focus endurance (2).
 
 ### Plan (`/plan`) — calendrier prévu / réalisé / écarts
-- **Téléphone** : titre + frise des 4 phases (barre segmentée, phase courante en `accent`), puis la **semaine en cours en premier**, dépliée. Bouton « Aujourd'hui » pour y revenir. Les autres semaines sont repliées : une ligne par semaine (n°, dates, km réalisé / prévu, `Chip` de statut). Dans une semaine : une ligne par séance (jour, titre, `Chip` de type, km réalisé / prévu, glyphe de statut). Tap sur une séance → détail.
-- **PC** : frise des phases en pleine largeur, puis, par phase, les cartes de semaine en **2 colonnes**, toutes dépliées. La semaine en cours a un anneau `accent` et un badge « en cours ». Une colonne Δ (écart) est visible sur chaque ligne de séance.
+- **Téléphone** : titre + `PhaseTimeline` en carte, puis la **semaine en cours en premier**, dépliée. Bouton « Aujourd'hui » pour y revenir. Les autres semaines sont repliées : une ligne par semaine (n°, dates, km réalisé / prévu, `Chip` de statut). Dans une semaine : une ligne par séance (jour, titre, `Chip` de type, km réalisé / prévu, glyphe de statut). Tap sur une séance → détail.
+- **PC** : `PhaseTimeline` en pleine largeur, puis, par phase, les cartes de semaine en **2 colonnes**, dépliées. Dans la phase en cours, seules les 4 dernières semaines sont dépliées, les plus anciennes sont regroupées sur une ligne « Semaines 1 à 4 · afficher ». La semaine en cours a un anneau `accent` et un badge « en cours ». Chaque ligne de séance montre réalisé / prévu, un glyphe de statut (pastille 28 px) et, en cas d'écart, une ligne « Δ allure −14 s · FC +4 » en `accent-ink`.
 
 ### Séances (`/seances`) — historique
 - **Téléphone** : liste de cartes (date + type, titre, puis 3 colonnes Distance / Allure / FC : réalisé en grand, visé dessous, écart en `accent-ink`). Les séances non réalisées montrent un `Chip warn` ✕. Filtre par type en haut (pilules défilantes).
@@ -169,8 +173,8 @@ Pièces du prototype qui disparaissent au profit des composants ci-dessus : `com
 - **PC** : 2 colonnes d'entrées. Le questionnaire et la saisie s'ouvrent dans un panneau latéral de 480 px.
 
 ### Échéances (`/echeances`)
-- **Téléphone** : liste des courses et tests (nom, date, J-n en `num-md`, objectif). La course cible est en tête avec un liseré `accent`.
-- **PC** : frise horizontale du plan (30 semaines, 4 phases) avec les échéances posées dessus, puis la liste en 2 colonnes.
+- **Téléphone** : liste des courses et tests (nom, date et semaine du plan, J-n en `num-md`, objectif). La course cible est en tête avec un anneau `accent` et un `Chip quality` « Course cible ». Les échéances passées sont regroupées sous « Passées », avec le résultat réalisé. Bouton secondary « Ajouter une échéance ». Les tests encore hypothétiques portent un `Chip demo` « exemple ».
+- **PC** : `PhaseTimeline` avec les échéances posées dessus (et aujourd'hui en `accent`), puis la liste en 2 colonnes.
 
 ### Connexion (`/login`)
 Carte centrée de 400 px maximum sur fond `bg`, logo, champ e-mail, bouton primary. Identique sur téléphone et PC.
@@ -203,3 +207,4 @@ Un dégradé ailleurs que dans le bandeau, du petit texte blanc sur `accent`, le
 |---|---|---|
 | v1 | 2026-11-13 | Direction « Lac » (C) avec le bandeau de B. Palette Ardoise, Schibsted Grotesk + Fragment Mono, nom Target 42, 12 composants. |
 | v2 | 2026-11-14 | **Retour au style du prototype v0, affiné.** Raison : en voyant le prototype avec ses vraies valeurs, Roméo le préfère à la v1 : plus d'énergie, plus lisible en plein jour, et un bandeau compte à rebours qui donne l'identité. La structure est conservée (noms de tokens, 12 composants, page `/design`), seules les valeurs et l'aspect changent. Ajouts : deux mises en page définies (téléphone 390 px / PC tableau de bord), 5 destinations de navigation, contrastes corrigés au niveau AA, emoji remplacés par une échelle nommée. Thème clair corail, Barlow + Barlow Condensed. |
+| v2.1 | 2026-11-14 | Maquettes v2 des 5 écrans en 390 et 1280 px. Ajouts : token `on-hero`, taille `sheet-width` (480), composant `PhaseTimeline` (13ᵉ), variantes `Chip off` (hors plan) et `Chip demo`, `Button toggle` (filtres), `Stat compare`, zone visée dans `TrendChart line`, règle « jour de repos » sur Aujourd'hui, regroupement des anciennes semaines dans Plan (PC). Artefact design system mis à jour en v2. |
