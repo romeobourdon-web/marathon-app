@@ -41,3 +41,25 @@ export function pairedBarHeightsPct(planned: number[], done: number[]): { planne
   const scaleMax = Math.max(0, ...planned, ...done);
   return { planned: barHeightsPct(planned, scaleMax), done: barHeightsPct(done, scaleMax) };
 }
+
+export interface LineGeometry {
+  points: { x: number; y: number }[];
+  /** Ordonnées (0–100, 0 en haut) des valeurs de référence (cible, bornes d'une zone visée). */
+  refY: number[];
+}
+
+/**
+ * Courbe dans un repère 0–100 (y = 0 en haut), l'échelle incluant les valeurs de référence.
+ * `invert` : axe inversé, la plus petite valeur en haut (allure : plus rapide = plus haut, DESIGN.md §5).
+ */
+export function lineGeometry(values: number[], refs: number[], options: { invert?: boolean; paddingPct?: number } = {}): LineGeometry {
+  const { invert = false, paddingPct = 10 } = options;
+  const all = [...values, ...refs];
+  const min = Math.min(...all);
+  const max = Math.max(...all);
+  const range = max - min || 1;
+  const inner = 100 - 2 * paddingPct;
+  const y = (v: number) => round2(paddingPct + ((invert ? v - min : max - v) / range) * inner);
+  const x = (i: number) => (values.length === 1 ? 50 : round2((i / (values.length - 1)) * 100));
+  return { points: values.map((v, i) => ({ x: x(i), y: y(v) })), refY: refs.map(y) };
+}

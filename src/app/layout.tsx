@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Fragment_Mono, Schibsted_Grotesk } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 
-// Polices du design system (DESIGN.md §3), auto-hébergées par next/font.
-// Schibsted Grotesk : police variable, un seul fichier couvre les graisses 400 à 600.
-const sans = Schibsted_Grotesk({
-  variable: "--font-schibsted",
+// Polices du design system v2.1 (DESIGN.md §4), auto-hébergées par next/font.
+// Barlow : texte courant (400 à 700).
+const sans = Barlow({
+  variable: "--font-barlow",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-// Fragment Mono : une seule graisse (400). Les chiffres ne sont jamais en gras.
-const mono = Fragment_Mono({
-  variable: "--font-fragment",
+// Barlow Condensed : chiffres et titres (600, 700).
+const display = Barlow_Condensed({
+  variable: "--font-barlow-condensed",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
 // Layout racine : uniquement <html> et <body>. Les écrans du prototype ont leur layout dans (prototype)/.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${sans.variable} ${mono.variable} h-full antialiased`}>
+    <html lang="fr" className={`${sans.variable} ${display.variable} h-full antialiased`}>
       <body className="min-h-full font-sans">{children}</body>
     </html>
   );

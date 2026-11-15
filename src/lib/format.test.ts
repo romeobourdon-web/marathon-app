@@ -6,6 +6,9 @@ import {
   formatDistanceParts,
   formatDurationApprox,
   formatPacePerKm,
+  formatPaceRangeValue,
+  formatPaceValue,
+  formatWeeksDays,
   formatSignedDelta,
 } from "./format";
 
@@ -72,5 +75,22 @@ describe("formatDate", () => {
   it("formate une date ISO en français", () => {
     expect(formatDate("2026-11-14")).toBe("sam. 14 nov.");
     expect(formatDate("2026-11-14", "long")).toBe("samedi 14 novembre");
+    expect(formatDate("2027-04-18", "full")).toBe("dim. 18 avril 2027");
+  });
+});
+
+describe("formatPaceValue / formatPaceRangeValue", () => {
+  it("allure sans unité, fourchette avec tiret demi-cadratin", () => {
+    expect(formatPaceValue(298)).toBe("4'58");
+    expect(formatPaceRangeValue({ min: 345, max: 370 })).toBe("5'45–6'10");
+    expect(formatPaceRangeValue({ min: 300, max: 300 })).toBe("5'00");
+  });
+});
+
+describe("formatWeeksDays", () => {
+  it("accorde semaine(s) et jour(s)", () => {
+    expect(formatWeeksDays(22, 1)).toBe(`22${NBSP}semaines et 1${NBSP}jour`);
+    expect(formatWeeksDays(1, 0)).toBe(`1${NBSP}semaine et 0${NBSP}jour`);
+    expect(formatWeeksDays(3, 4)).toBe(`3${NBSP}semaines et 4${NBSP}jours`);
   });
 });

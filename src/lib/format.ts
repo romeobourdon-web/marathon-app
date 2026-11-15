@@ -78,6 +78,17 @@ function frNumber(value: number, digits: number): string {
   return value.toLocaleString("fr-FR", { minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
 }
 
+/** 330 → "5'30" : allure sans unité, pour une tuile ou un tableau dont l'unité est affichée à part */
+export function formatPaceValue(secondsPerKm: number): string {
+  const s = Math.round(secondsPerKm);
+  return `${Math.floor(s / 60)}'${(s % 60).toString().padStart(2, "0")}`;
+}
+
+/** { min: 345, max: 370 } → "5'45–6'10" (min = plus rapide) */
+export function formatPaceRangeValue(range: { min: number; max: number }): string {
+  return range.min === range.max ? formatPaceValue(range.min) : `${formatPaceValue(range.min)}–${formatPaceValue(range.max)}`;
+}
+
 /** 330 → "5'30 /km" (secondes par km) */
 export function formatPacePerKm(secondsPerKm: number): string {
   const s = Math.round(secondsPerKm);
@@ -120,12 +131,18 @@ export function formatSignedDelta(value: number, digits = 0): string {
   return rounded > 0 ? `+${abs}` : `${MINUS}${abs}`;
 }
 
+/** (22, 1) → "22 semaines et 1 jour" ; (1, 0) → "1 semaine et 0 jour" */
+export function formatWeeksDays(weeks: number, days: number): string {
+  return `${weeks}${NBSP}semaine${weeks > 1 ? "s" : ""} et ${days}${NBSP}jour${days > 1 ? "s" : ""}`;
+}
+
 const dateFormatters = {
   short: new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }),
   long: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }),
+  full: new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }),
 };
 
-/** "2026-11-14" → "sam. 14 nov." (short) ou "samedi 14 novembre" (long) */
-export function formatDate(isoDate: string, style: "short" | "long" = "short"): string {
+/** "2026-11-14" → "sam. 14 nov." (short), "samedi 14 novembre" (long) ou "sam. 14 novembre 2026" (full) */
+export function formatDate(isoDate: string, style: "short" | "long" | "full" = "short"): string {
   return dateFormatters[style].format(new Date(`${isoDate}T00:00:00Z`));
 }

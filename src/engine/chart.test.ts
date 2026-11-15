@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barHeightsPct, distanceGapM, pairedBarHeightsPct, trendGeometry } from "./chart";
+import { barHeightsPct, distanceGapM, lineGeometry, pairedBarHeightsPct, trendGeometry } from "./chart";
 
 describe("barHeightsPct", () => {
   it("met à l'échelle de la plus grande valeur", () => {
@@ -42,5 +42,18 @@ describe("distanceGapM", () => {
 describe("pairedBarHeightsPct", () => {
   it("met prévu et réalisé sur la même échelle", () => {
     expect(pairedBarHeightsPct([10, 20], [5, 25])).toEqual({ planned: [40, 80], done: [20, 100] });
+  });
+});
+
+describe("lineGeometry", () => {
+  it("axe normal : la plus grande valeur en haut, références placées sur la même échelle", () => {
+    const g = lineGeometry([200, 100], [150], { paddingPct: 0 });
+    expect(g.points.map((p) => p.y)).toEqual([0, 100]);
+    expect(g.refY).toEqual([50]);
+  });
+  it("axe inversé (allure) : la plus rapide (plus petite) en haut", () => {
+    const g = lineGeometry([300, 360], [345, 370], { invert: true, paddingPct: 0 });
+    expect(g.points.map((p) => p.y)).toEqual([0, 85.71]);
+    expect(g.refY).toEqual([64.29, 100]);
   });
 });
