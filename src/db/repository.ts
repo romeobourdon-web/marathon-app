@@ -4,11 +4,11 @@
 // Le plan a été généré par planner/buildPlan puis inséré par le seed : la base fait foi (D11).
 
 import type { TablesInsert } from "@/db/database.types";
-import { toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
+import { toActivityRecord, toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
 import { DESIGN_PREVIEW } from "@/db/seed/mock/design";
 import { createSupabaseAdminClient } from "@/db/supabase/admin";
 import { createSupabaseServerClient } from "@/db/supabase/server";
-import type { Race } from "@/db/types";
+import type { ActivityRecord, Race } from "@/db/types";
 import { linkSessions } from "@/planner/sessions";
 import type { Session } from "@/planner/types";
 
@@ -66,6 +66,23 @@ export async function getSessions(today: string): Promise<Session[]> {
   return linkSessions(data.map(toPlannedSession), today, (s) => results.get(s.id) ?? { skipped: true });
 }
 
+/**
+ * Toutes les activités réalisées (tous sports, marche comprise : rien n'est masqué, D04/D28).
+ * Le filtrage « compte pour le plan » est fait par engine/ et planner/.
+ * Les activités fictives (source = 'mock', seed --mock) ne sont rendues que s'il n'existe aucune vraie activité.
+ */
+export async function getActivities(): Promise<ActivityRecord[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("activity")
+    .select("id, source, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps")
+    .order("start_time")
+    .range(0, 9999);
+  if (error || !data) fail("activités", error);
+  const real = data.filter((a) => a.source !== "mock");
+  return (real.length > 0 ? real : data).map(toActivityRecord);
+}
+
 /** Données fictives de la page /design (D16) : toujours affichées avec un Chip « démo ». */
 export function getDesignPreview() {
   return DESIGN_PREVIEW;
@@ -103,19 +120,47 @@ export async function getActivitySourceIds(userId: string, source: SyncSource): 
   return new Set(data.map((a) => a.source_id));
 }
 
-/** Séances prévues du plan actif entre deux dates : date → id (une séance par jour au plus). */
-export async function getPlannedSessionIdsByDate(userId: string, from: string, to: string): Promise<Map<string, string>> {
+export interface LinkState {
+  /** Début du plan actif (la base fait foi, D11). */
+  planStart: string;
+  sessions: { id: string; date: string; distanceKm: number; linked: boolean }[];
+  activities: (ActivityRecord & { linked: boolean })[];
+}
+
+/**
+ * État de la liaison prévu ↔ réalisé entre deux dates (incluses) : séances du plan actif et activités garmin,
+ * chacune avec un indicateur « déjà liée ». Sert à planner/autoLinks (D28).
+ */
+export async function getLinkState(userId: string, from: string, to: string): Promise<LinkState> {
   const admin = createSupabaseAdminClient();
-  const plan = await admin.from("plan").select("id").eq("user_id", userId).eq("is_active", true).maybeSingle();
+  const plan = await admin.from("plan").select("id, start_date").eq("user_id", userId).eq("is_active", true).maybeSingle();
   if (plan.error || !plan.data) fail("plan actif", plan.error);
-  const { data, error } = await admin
+  const sessions = await admin
     .from("planned_session")
-    .select("id, date")
+    .select("id, date, distance_m, session_link (id)")
     .eq("plan_id", plan.data.id)
     .gte("date", from)
     .lte("date", to);
-  if (error) fail("séances prévues", error);
-  return new Map(data.map((s) => [s.date, s.id]));
+  if (sessions.error) fail("séances prévues", sessions.error);
+  const activities = await admin
+    .from("activity")
+    .select("id, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, session_link (id)")
+    .eq("user_id", userId)
+    .eq("source", "garmin")
+    .gte("local_date", from)
+    .lte("local_date", to)
+    .range(0, 9999);
+  if (activities.error) fail("activités", activities.error);
+  return {
+    planStart: plan.data.start_date,
+    sessions: sessions.data.map((s) => ({ id: s.id, date: s.date, distanceKm: s.distance_m / 1000, linked: s.session_link.length > 0 })),
+    activities: activities.data.map((a) => ({ ...toActivityRecord(a), linked: asList(a.session_link).length > 0 })),
+  };
+}
+
+/** Relation 1–1 renvoyée par PostgREST sous forme d'objet, de tableau ou de null. */
+function asList<T>(v: T | T[] | null): T[] {
+  return v === null ? [] : Array.isArray(v) ? v : [v];
 }
 
 // ── Écritures (synchro, scripts uniquement) ─────────────────────────────────

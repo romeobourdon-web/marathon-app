@@ -2,7 +2,8 @@
 // utilisés par planner/ et les écrans. Fonctions pures, testées.
 
 import type { Tables } from "@/db/database.types";
-import type { ActivityResult, JournalEntry, Race } from "@/db/types";
+import type { ActivityRecord, ActivityResult, CompletedRun, JournalEntry, Race } from "@/db/types";
+import { combineActivities } from "@/engine/activity";
 import { paceFromSpeed, targetPace } from "@/engine/pace";
 import type { PhaseId, PlannedSession, SessionType } from "@/planner/types";
 
@@ -61,7 +62,8 @@ function toJournal(j: JournalRow | JournalRow[] | null): JournalEntry | undefine
 /**
  * Réalisé d'une séance prévue, lu dans session_link. Sans activité liée → séance non faite
  * (le statut skipped / done / today reste décidé par planner/linkSessions).
- * Plusieurs activités liées (double footing) : la première de la journée.
+ * Plusieurs activités liées (double sortie) : agrégées par engine/combineActivities (D28) ;
+ * le journal est celui de la première activité qui en a un.
  * `ignoreMock` : les activités fictives (source = 'mock') sont ignorées dès que de vraies activités existent.
  */
 export function toActivityResult(r: PlannedSessionRow, options: { ignoreMock?: boolean } = {}): ActivityResult {
@@ -69,16 +71,33 @@ export function toActivityResult(r: PlannedSessionRow, options: { ignoreMock?: b
     .map((l) => l.activity)
     .filter((a): a is LinkedActivityRow => a !== null && !(options.ignoreMock && a.source === "mock"))
     .sort((a, b) => a.start_time.localeCompare(b.start_time));
-  const a = activities[0];
-  if (!a) return { skipped: true };
+  const runs: CompletedRun[] = activities.map((a) => ({
+    distanceKm: (a.distance_m ?? 0) / 1000,
+    durationSec: a.moving_time_s ?? 0,
+    avgPace: paceFromSpeed(a.avg_speed_mps ?? 0) ?? 0,
+    avgHr: a.avg_hr ?? 0,
+  }));
+  const actual = combineActivities(runs);
+  if (!actual) return { skipped: true };
+  const journal = activities.map((a) => toJournal(a.journal_entry)).find((j) => j !== undefined);
+  return { skipped: false, actual, journal };
+}
+
+export type ActivityRow = Pick<
+  Tables<"activity">,
+  "id" | "local_date" | "start_time" | "sport" | "distance_m" | "moving_time_s" | "avg_hr" | "avg_speed_mps"
+>;
+
+/** Une activité réalisée, en unités d'affichage (km, s/km). */
+export function toActivityRecord(a: ActivityRow): ActivityRecord {
   return {
-    skipped: false,
-    actual: {
-      distanceKm: (a.distance_m ?? 0) / 1000,
-      durationSec: a.moving_time_s ?? 0,
-      avgPace: paceFromSpeed(a.avg_speed_mps ?? 0) ?? 0,
-      avgHr: a.avg_hr ?? 0,
-    },
-    journal: toJournal(a.journal_entry),
+    id: a.id,
+    date: a.local_date,
+    startTime: a.start_time,
+    sport: a.sport,
+    distanceKm: (a.distance_m ?? 0) / 1000,
+    durationSec: a.moving_time_s ?? 0,
+    avgPace: paceFromSpeed(a.avg_speed_mps ?? 0),
+    avgHr: a.avg_hr,
   };
 }

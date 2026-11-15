@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import Link from "next/link";
-import { getPlanStart, getRace, getSessions } from "@/db/repository";
+import { getActivities, getPlanStart, getRace, getSessions } from "@/db/repository";
 import { currentWeek, daysToRace } from "@/planner/calendar";
 import { TOTAL_WEEKS } from "@/planner/plan";
 import { nextSession } from "@/planner/sessions";
@@ -29,10 +29,11 @@ async function Dashboard() {
   const today = todayInParis();
   const planStart = await getPlanStart();
   const sessions = await getSessions(today);
+  const activities = await getActivities();
   const week = currentWeek(planStart, today);
-  const summary = weekSummary(sessions, planStart, week, today);
+  const summary = weekSummary(sessions, activities, planStart, week, today);
   const next = nextSession(sessions);
-  const trend = volumeTrend(sessions, planStart, today);
+  const trend = volumeTrend(sessions, activities, planStart, today);
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:gap-5">

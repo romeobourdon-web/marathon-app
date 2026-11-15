@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { getPlanStart, getSessions } from "@/db/repository";
+import { getActivities, getPlanStart, getSessions } from "@/db/repository";
 import { currentWeek } from "@/planner/calendar";
 import { PHASES, TOTAL_WEEKS } from "@/planner/plan";
 import { weekSummary } from "@/planner/summary";
@@ -24,6 +24,7 @@ async function Plan() {
   const today = todayInParis();
   const planStart = await getPlanStart();
   const sessions = await getSessions(today);
+  const activities = await getActivities();
   const cw = currentWeek(planStart, today);
 
   return (
@@ -42,7 +43,7 @@ async function Plan() {
 
           <div className="grid gap-3 lg:grid-cols-2">
             {Array.from({ length: phase.weeks.max - phase.weeks.min + 1 }, (_, k) => {
-              const w = weekSummary(sessions, planStart, phase.weeks.min + k, today);
+              const w = weekSummary(sessions, activities, planStart, phase.weeks.min + k, today);
               const isCurrent = w.week === cw;
               return (
                 <Card key={w.week} className={isCurrent ? "ring-2 ring-accent" : ""}>

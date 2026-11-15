@@ -14,7 +14,7 @@ import type { Json } from "@/db/database.types";
 import {
   finishSyncRun,
   getActivitySourceIds,
-  getPlannedSessionIdsByDate,
+  getLinkState,
   getUserIdByEmail,
   linkSession,
   startSyncRun,
@@ -25,8 +25,9 @@ import {
   type StreamInput,
 } from "@/db/repository";
 import { PROJECT_START } from "@/db/seed/reference";
-import { isRunningSport } from "@/engine/sport";
-import { todayInParis } from "@/lib/dates";
+import { countsForPlan } from "@/engine/activity";
+import { addDays, todayInParis } from "@/lib/dates";
+import { autoLinks } from "@/planner/link";
 
 function parseFrom(argv: string[]): string {
   const i = argv.indexOf("--from");
@@ -122,17 +123,16 @@ async function main() {
     );
     console.log(`Bien-être : ${wellness.length} jours.`);
 
-    // 4. Liaison automatique : chaque course → séance prévue du même jour (les autres sports restent « hors plan »)
-    const plannedByDate = await getPlannedSessionIdsByDate(userId, from, to);
-    let links = 0;
-    for (const a of activities) {
-      const sessionId = plannedByDate.get(a.localDate);
-      if (sessionId && isRunningSport(a.sport)) {
-        await linkSession(userId, sessionId, idBySource.get(a.sourceId)!, "auto");
-        links++;
-      }
-    }
-    console.log(`Liaisons prévu ↔ réalisé : ${links} (les liaisons existantes ne sont pas dupliquées).`);
+    // 4. Liaison automatique (D28) : le jour même, sinon une séance non liée à ± 1 jour (la plus proche en distance).
+    //    Seules les courses qui comptent pour le plan sont liées (D22 : pas d'autre sport ; D28 : pas de marche).
+    //    Fenêtre élargie d'un jour de chaque côté ; les liaisons existantes ne sont jamais modifiées.
+    const state = await getLinkState(userId, addDays(from, -1), addDays(to, 1));
+    const newLinks = autoLinks(
+      state.sessions,
+      state.activities.map((a) => ({ ...a, eligible: countsForPlan(a, state.planStart) })),
+    );
+    for (const l of newLinks) await linkSession(userId, l.sessionId, l.activityId, "auto");
+    console.log(`Liaisons prévu ↔ réalisé : ${newLinks.length} nouvelles.`);
 
     await finishSyncRun(runId, { status: "success", upserted });
     console.log(`Synchro terminée : ${upserted} lignes écrites.`);

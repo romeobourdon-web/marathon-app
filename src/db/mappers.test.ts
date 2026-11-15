@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
+import { toActivityRecord, toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
 
 const row: PlannedSessionRow = {
   id: "uuid-1",
@@ -67,25 +67,24 @@ describe("toActivityResult", () => {
     });
   });
 
-  it("garde la première activité de la journée et tolère un journal absent", () => {
-    const activity = (start: string, d: number) => ({
+  it("agrège une séance faite en plusieurs activités (D28) et tolère un journal absent", () => {
+    const activity = (start: string, d: number, pace: number, hr: number, time: number) => ({
       source: "garmin",
       start_time: start,
       distance_m: d,
-      moving_time_s: 1_800,
-      avg_hr: 140,
-      avg_speed_mps: 3,
+      moving_time_s: time,
+      avg_hr: hr,
+      avg_speed_mps: 1000 / pace,
       journal_entry: null,
     });
     const r = toActivityResult({
       ...row,
-      session_link: [{ activity: activity("2026-10-06T18:00:00+00:00", 5_000) }, { activity: activity("2026-10-06T07:00:00+00:00", 6_000) }],
+      session_link: [
+        { activity: activity("2026-10-25T16:29:00+00:00", 7_800, 282, 154, 2_200) },
+        { activity: activity("2026-10-25T15:15:00+00:00", 1_970, 284, 136, 561) },
+      ],
     });
-    expect(r.skipped).toBe(false);
-    if (!r.skipped) {
-      expect(r.actual.distanceKm).toBe(6);
-      expect(r.journal).toBeUndefined();
-    }
+    expect(r).toEqual({ skipped: false, actual: { distanceKm: 9.77, durationSec: 2_761, avgPace: 282, avgHr: 150 }, journal: undefined });
   });
 
   it("ignore le réalisé fictif quand de vraies activités existent", () => {
@@ -107,5 +106,22 @@ describe("toActivityResult", () => {
     };
     expect(toActivityResult(mockLinked).skipped).toBe(false);
     expect(toActivityResult(mockLinked, { ignoreMock: true })).toEqual({ skipped: true });
+  });
+});
+
+describe("toActivityRecord", () => {
+  it("convertit m → km et m/s → allure, sans perdre une FC absente", () => {
+    expect(
+      toActivityRecord({
+        id: "a",
+        local_date: "2026-10-31",
+        start_time: "2026-10-31T21:05:00+00:00",
+        sport: "running",
+        distance_m: 5_680,
+        moving_time_s: 4_119,
+        avg_hr: null,
+        avg_speed_mps: 1000 / 1163,
+      }),
+    ).toEqual({ id: "a", date: "2026-10-31", startTime: "2026-10-31T21:05:00+00:00", sport: "running", distanceKm: 5.68, durationSec: 4_119, avgPace: 1163, avgHr: null });
   });
 });

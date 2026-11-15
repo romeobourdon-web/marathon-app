@@ -8,6 +8,20 @@ export interface CompletedRun {
   avgHr: number;
 }
 
+/** Une activité réalisée (toutes sources), en unités d'affichage. */
+export interface ActivityRecord {
+  id: string;
+  /** Date locale du début (« AAAA-MM-JJ »). */
+  date: string;
+  startTime: string;
+  sport: string;
+  distanceKm: number;
+  durationSec: number;
+  /** s/km ; null si la vitesse moyenne est inconnue. */
+  avgPace: number | null;
+  avgHr: number | null;
+}
+
 export interface JournalEntry {
   feeling: 1 | 2 | 3 | 4 | 5;
   rpe: number; // 1 à 10
