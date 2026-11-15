@@ -14,7 +14,7 @@ Specs et décisions : voir [`docs/`](docs/) et [`CLAUDE.md`](CLAUDE.md).
 ## Sauvegarder / restaurer la base locale (D23)
 
 La base contient des données réelles (journal non resynchronisable) : **jamais de `db:reset` sans sauvegarde**.
-- Sauvegarder : `npm run db:backup` → `backups/AAAA-MM-JJ.sql` (dossier ignoré par git).
+- Sauvegarder : `npm run db:backup` → `backups/AAAA-MM-JJ.sql` (dossier ignoré par git ; une 2e sauvegarde le même jour ajoute l'heure au nom, rien n'est écrasé).
 - Restaurer : `npm run db:reset`, puis `docker exec -i supabase_db_Application_marathon psql -U postgres < backups/AAAA-MM-JJ.sql`.
 
 ## Structure
