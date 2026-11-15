@@ -1,18 +1,21 @@
-// Icônes au trait (DESIGN.md §4) : 24 px, épaisseur 1,8, currentColor. Pas d'icône pleine, pas d'emoji.
+// Icônes au trait (DESIGN.md, maquettes v2.1) : 24 × 24, épaisseur 2, currentColor. Pas d'icône pleine, pas d'emoji.
 
 const PATHS = {
-  today: "M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z",
-  calendar: "M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7ZM4 10h16M8 3v4M16 3v4",
-  journal: "M6 3h9l4 4v14H6V3ZM14 3v5h5M9 12h7M9 16h5",
-  deadlines: "M5 21V4M5 4h11l-2 4 2 4H5",
+  today: "M3 12h4l3-8 4 16 3-8h4",
+  plan: "M4 5h16M4 12h16M4 19h10",
+  sessions: "M5 20V10M12 20V4M19 20v-7",
+  journal: "M6 3h10l3 3v15H6zM9 9h7M9 13h7M9 17h4",
+  deadlines: "M5 21V4M5 4h12l-2 4 2 4H5",
   chevron: "m9 6 6 6-6 6",
+  // Ancien nom (v1) gardé pour compatibilité : équivalent de « plan ».
+  calendar: "M4 5h16M4 12h16M4 19h10",
 } as const;
 
 export type IconName = keyof typeof PATHS;
 
-export function Icon({ name, className = "size-6" }: { name: IconName; className?: string }) {
+export function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
       <path d={PATHS[name]} />
     </svg>
   );

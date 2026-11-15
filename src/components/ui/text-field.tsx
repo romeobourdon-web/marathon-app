@@ -8,20 +8,20 @@ type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "id"> & {
   error?: string;
 };
 
-/** Saisie : label au-dessus, aide en dessous, 16 px minimum (pas de zoom iOS) (DESIGN.md §4). */
+/** Saisie : label au-dessus, aide dessous, 16 px minimum ; pleine largeur sur téléphone, 480 px max sur PC (DESIGN.md §5). */
 export function TextField({ id, label, hint, error, className = "", ...rest }: TextFieldProps) {
   const messageId = `${id}-message`;
   const message = error ?? hint;
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
-      <label htmlFor={id} className="text-label text-text-muted">
+    <div className={`flex w-full flex-col gap-2 lg:max-w-(--sheet-width) ${className}`}>
+      <label htmlFor={id} className="text-label text-text">
         {label}
       </label>
       <input
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={message ? messageId : undefined}
-        className={`focus-ring h-(--control-height) rounded-md border-(length:--border-hairline) bg-surface-raised px-4 text-body text-text placeholder:text-text-muted ${
+        className={`focus-ring min-h-(--control-height) w-full rounded-md border-(length:--border-hairline) bg-surface-raised px-4 py-3 text-body text-text placeholder:text-text-subtle disabled:cursor-not-allowed disabled:text-text-subtle ${
           error ? "border-alert" : "border-line-strong"
         }`}
         {...rest}
