@@ -35,7 +35,7 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 - [x] Connexion automatique en local, `/login` masqué (D26)
 - [x] P2-M1 — Valeurs justes : réalisé hebdo, doubles sorties, liaison ± 1 jour, marche exclue (D28)
 - [x] P2-M2 — Liaison : seuil de 50 % et recalcul à chaque synchro (D29)
-- [ ] P2-M3 — Design system v2.1 « Corail » : tokens, polices, 13 composants, page `/design` (D24, D27)
+- [x] P2-M3 — Design system v2.1 « Corail » : tokens, polices, 13 composants, page `/design` (D24, D27)
 - [ ] P2-M4 — Écran Aujourd'hui en v2.1, téléphone et PC (D25)
 - [ ] Calendrier : prévu / réalisé / écarts
 - [ ] Historique des activités + détail d'une séance
