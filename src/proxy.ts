@@ -1,9 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { publicSupabaseEnv } from "@/db/supabase/env";
+import { autoLoginCredentials, publicSupabaseEnv } from "@/db/supabase/env";
 
 // Proxy (ex-middleware, Next 16) : rafraîchit la session Supabase à chaque requête
 // et renvoie vers /login toute page demandée sans session.
+// En local avec AUTO_LOGIN=true (D26) : ouvre la session du compte local et ne montre jamais /login.
 
 const PUBLIC_PATHS = ["/login"];
 
@@ -24,11 +25,27 @@ export async function proxy(request: NextRequest) {
   });
 
   // getUser() valide le jeton auprès du serveur d'authentification (pas seulement le cookie).
-  const {
+  let {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const auto = autoLoginCredentials();
+  if (!user && auto) {
+    // Les cookies de session sont posés par setAll, sur la requête (pour la page) et sur la réponse.
+    ({
+      data: { user },
+    } = await supabase.auth.signInWithPassword(auto));
+  }
+
   const isPublic = PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p));
+  if (auto && user && isPublic) {
+    const home = request.nextUrl.clone();
+    home.pathname = "/";
+    home.search = "";
+    const redirect = NextResponse.redirect(home);
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return redirect;
+  }
   if (!user && !isPublic) {
     const login = request.nextUrl.clone();
     login.pathname = "/login";
