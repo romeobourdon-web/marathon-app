@@ -5,6 +5,10 @@ Specs et décisions : voir [`docs/`](docs/) et [`CLAUDE.md`](CLAUDE.md).
 
 ## Démarrer en local
 
+**Lancer l'app : double-clic sur Target 42 (Bureau).** Il ouvre Docker si besoin, démarre la base et l'app, puis ouvre http://localhost:3000 (équivalent en terminal : `npm run app`). Le lanceur est versionné dans `scripts/Target42.command`.
+
+Installation (une seule fois) :
+
 1. Ouvrir Docker Desktop, puis dans le dossier du projet : `npm install` (la première fois seulement).
 2. `npm run db:start` : démarre Supabase en local (Studio : http://localhost:54323).
 3. Compléter `.env.local` avec les variables listées dans `.env.example` (valeurs : `npm run db:status`).
