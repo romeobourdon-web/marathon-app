@@ -112,6 +112,7 @@ Polices libres (Google Fonts, OFL), via `next/font/google` :
 | `caption` | sans | 12 / 16 | 12 / 16 | 400 | Unités, légendes, axes |
 | `button` | sans | 15 / 20 | 15 / 20 | 700 | Boutons |
 | `nav` | sans | 11 / 14 | 14 / 20 | 600 | Onglets (bas sur téléphone, pilules sur PC) |
+| **+** `micro` | sans | 11 / 14 | 11 / 14 | 700, +0,06em, CAPITALES | Libellés de `Stat compare`, en-têtes de tableau, jours, axes (v2.2) |
 
 Formats (`lib/format.ts`) : allure `5'30 /km`, durée `3:30:00`, distance `25,6 km`, écart signé `+5 s` / `−0,6 km` (signe moins U+2212), dates `ven. 13 nov.`.
 
@@ -119,7 +120,7 @@ Formats (`lib/format.ts`) : allure `5'30 /km`, durée `3:30:00`, distance `25,6 
 
 - Espacements : grille de 4 px inchangée (`space-1` 4 → `space-12` 48).
   **+** `page-x` : 16 px (téléphone) / 24 px (PC). **+** `card-pad` : 20 / 24. **+** `grid-gap` : 16 / 20. **+** `container` : 1152 px.
-- Rayons : `radius-sm` **4** (haut des barres) · `radius-md` **16** (tuiles, champs, info-bulles) · `radius-lg` 24 (cartes, bandeau) · `radius-pill` 999 (badges, onglets, boutons).
+- Rayons : `radius-sm` **4** (haut des barres) · **+** `radius-ctl` 12 (segments d'échelle, logo, info-bulles des barres ; v2.2) · `radius-md` **16** (tuiles, champs, info-bulles) · `radius-lg` 24 (cartes, bandeau) · `radius-pill` 999 (badges, onglets, boutons).
 - Tailles : `touch-min` 44 · `control-height` **48** · `nav-height` 64 (onglets du téléphone) · **+** `header-height` 56 · `ring-size` 124 · **+** `day-dot` 36. · **+** `sheet-width` 480 (panneau latéral PC, v2.1)
 - Bordures : `border-hairline` 1 px · `border-focus` 2 px · **+** `border-plan` 2 px (pointillés du prévu futur) · `stroke-chart` 2 px · `stroke-ring` 8 px.
 
