@@ -15,6 +15,8 @@ Installation (une seule fois) :
 4. `npm run dev`, puis ouvrir http://localhost:3000 (`Ctrl + C` pour arrêter).
 5. Autres commandes : `npm run db:stop`, `npm run db:reset`, `npm run lint`, `npm run build`, `npm test`.
 
+Données : `npm run sync` (Garmin, relit au moins les 14 derniers jours, D31) ; `npm run import:phone` (sorties enregistrées au téléphone, une seule fois, D32 ; sans risque si relancé).
+
 ## Sauvegarder / restaurer la base locale (D23)
 
 La base contient des données réelles (journal non resynchronisable) : **jamais de `db:reset` sans sauvegarde**.

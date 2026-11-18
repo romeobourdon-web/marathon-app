@@ -25,7 +25,7 @@ Marathon : Annecy, avril 2027 (date à confirmer). Départ à l'EPFL : 16 févri
 - [x] M3 — Migrations du schéma V1 + seed (référence, plan généré, données fictives)
 - [x] M4 — Repository branché sur Supabase + connexion
 - [x] M5 — Connecteur Garmin + `npm run sync` : import des vraies activités
-- [ ] Rattrapage des sorties faites au téléphone depuis le 2026-04-04 (D18) → P2-M3c (D32)
+- [x] Rattrapage des sorties faites au téléphone depuis le 2026-04-04 (D18) → P2-M3c (D32)
 - [x] M6 — Design system v1 (tokens, polices, 12 composants, page `/design`)
 
 Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
@@ -38,7 +38,7 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 - [x] P2-M3 — Design system v2.1 « Corail » : tokens, polices, 13 composants, page `/design` (D24, D27)
 - [x] Lanceur « Target 42 » sur le Bureau (`npm run app`)
 - [x] P2-M3b — Mise à jour de sécurité Next.js (16.4.6) + règle « même semaine » dans le code (D30)
-- [ ] P2-M3c — Données complètes : synchro sur 14 jours, activités hors course visibles (D31), import des sorties au téléphone (D32)
+- [x] P2-M3c — Données complètes : synchro sur 14 jours, activités hors course visibles (D31), import des sorties au téléphone (D32)
 - [ ] P2-M4 — Écran Aujourd'hui en v2.1, téléphone et PC (D25)
 - [ ] P2-M5 — Séances + détail d'une séance en v2.1 (remplace « Historique des activités + détail »)
 - [ ] Calendrier : prévu / réalisé / écarts
