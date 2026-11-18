@@ -1,4 +1,5 @@
 // Petites fonctions d'affichage partagées par toutes les pages.
+import { daysBetween } from "@/lib/dates";
 
 /**
  * 298 → "4'58"
@@ -162,4 +163,26 @@ const SPORT_LABELS: Record<string, string> = {
 /** Libellé français d'un sport (typeKey Garmin ; suffixe de version « _v2 » ignoré) (D31). */
 export function formatSport(sport: string): string {
   return SPORT_LABELS[sport.replace(/_v\d+$/, "")] ?? "Autre";
+}
+
+/** "2026-11-19" vu le 18 → "Demain · jeudi 19 novembre" ; le jour même → "Aujourd'hui · …" ; sinon "Jeudi 19 novembre". */
+export function formatRelativeDay(isoDate: string, today: string): string {
+  const long = formatDate(isoDate, "long");
+  const gap = daysBetween(today, isoDate);
+  if (gap === 0) return `Aujourd'hui · ${long}`;
+  if (gap === 1) return `Demain · ${long}`;
+  return long.charAt(0).toUpperCase() + long.slice(1);
+}
+
+/** "2026-11-14" → "S" (initiale du jour, pastilles de la semaine) */
+export function formatDayInitial(isoDate: string): string {
+  return formatDate(isoDate, "long").charAt(0).toUpperCase();
+}
+
+/** Ligne « + n activités hors plan (vélo, 25 km ; marche, 5,1 km), non comptées. » (D31) ; undefined s'il n'y en a pas. */
+export function formatOffPlanNote(items: { sport: string; distanceKm: number }[]): string | undefined {
+  if (items.length === 0) return undefined;
+  const list = items.map((i) => `${formatSport(i.sport).toLowerCase()}, ${formatDistance(i.distanceKm * 1000)}`).join(" ; ");
+  const plural = items.length > 1;
+  return `+ ${items.length} activité${plural ? "s" : ""} hors plan (${list}), non comptée${plural ? "s" : ""}.`;
 }

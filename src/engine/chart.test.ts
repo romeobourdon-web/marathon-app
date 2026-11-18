@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barHeightsPct, distanceGapM, lineGeometry, pairedBarHeightsPct, trendGeometry } from "./chart";
+import { barHeightsPct, distanceGapM, lineGeometry, niceScaleMax, pairedBarHeightsPct, trendGeometry } from "./chart";
 
 describe("barHeightsPct", () => {
   it("met à l'échelle de la plus grande valeur", () => {
@@ -55,5 +55,13 @@ describe("lineGeometry", () => {
     const g = lineGeometry([300, 360], [345, 370], { invert: true, paddingPct: 0 });
     expect(g.points.map((p) => p.y)).toEqual([0, 85.71]);
     expect(g.refY).toEqual([64.29, 100]);
+  });
+});
+
+describe("niceScaleMax", () => {
+  it("arrondit au multiple supérieur du pas, au moins un pas", () => {
+    expect(niceScaleMax([43, 51.1, 38], 20)).toBe(60);
+    expect(niceScaleMax([60], 20)).toBe(60);
+    expect(niceScaleMax([], 20)).toBe(20);
   });
 });

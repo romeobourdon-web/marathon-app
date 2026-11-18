@@ -11,6 +11,9 @@ import {
   formatWeeksDays,
   formatSignedDelta,
   formatSport,
+  formatRelativeDay,
+  formatDayInitial,
+  formatOffPlanNote,
 } from "./format";
 
 const NBSP = " ";
@@ -104,5 +107,24 @@ describe("formatSport (D31)", () => {
     expect(formatSport("stand_up_paddleboarding_v2")).toBe("Paddle");
     expect(formatSport("cycling")).toBe("Vélo");
     expect(formatSport("yoga")).toBe("Autre");
+  });
+});
+
+describe("Aujourd'hui : jour relatif, initiale, hors plan", () => {
+  it("formatRelativeDay", () => {
+    expect(formatRelativeDay("2026-11-19", "2026-11-18")).toBe("Demain · jeudi 19 novembre");
+    expect(formatRelativeDay("2026-11-18", "2026-11-18")).toBe("Aujourd'hui · mercredi 18 novembre");
+    expect(formatRelativeDay("2026-11-22", "2026-11-18")).toBe("Dimanche 22 novembre");
+  });
+  it("formatDayInitial", () => {
+    expect(formatDayInitial("2026-11-14")).toBe("S");
+    expect(formatDayInitial("2026-11-16")).toBe("L");
+  });
+  it("formatOffPlanNote", () => {
+    expect(formatOffPlanNote([])).toBeUndefined();
+    expect(formatOffPlanNote([{ sport: "cycling", distanceKm: 25 }])).toBe("+ 1 activité hors plan (vélo, 25,0\u00a0km), non comptée.");
+    expect(formatOffPlanNote([{ sport: "cycling", distanceKm: 25 }, { sport: "walking", distanceKm: 5.1 }])).toBe(
+      "+ 2 activités hors plan (vélo, 25,0\u00a0km ; marche, 5,1\u00a0km), non comptées.",
+    );
   });
 });

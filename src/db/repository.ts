@@ -6,9 +6,11 @@
 import type { TablesInsert } from "@/db/database.types";
 import { toActivityRecord, toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
 import { DESIGN_PREVIEW } from "@/db/seed/mock/design";
+import { FORM_DEMO } from "@/db/seed/mock/form";
 import { createSupabaseAdminClient } from "@/db/supabase/admin";
 import { createSupabaseServerClient } from "@/db/supabase/server";
 import type { ActivityRecord, Race } from "@/db/types";
+import type { WellnessDay } from "@/engine/wellness";
 import { linkSessions } from "@/planner/sessions";
 import type { Session } from "@/planner/types";
 
@@ -81,6 +83,33 @@ export async function getActivities(): Promise<ActivityRecord[]> {
   if (error || !data) fail("activités", error);
   const real = data.filter((a) => a.source !== "mock");
   return (real.length > 0 ? real : data).map(toActivityRecord);
+}
+
+/** Bien-être (VFC, FC de repos, sommeil) entre deux dates incluses. */
+export async function getWellness(from: string, to: string): Promise<WellnessDay[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("wellness").select("date, hrv_ms, resting_hr, sleep_s").gte("date", from).lte("date", to);
+  if (error) fail("bien-être", error);
+  return data.map((w) => ({ date: w.date, hrvMs: w.hrv_ms, restingHr: w.resting_hr, sleepS: w.sleep_s }));
+}
+
+/** Dernier questionnaire du matin (daily_checkin) daté au plus tard de `today`, ou null. */
+export async function getLatestCheckin(today: string): Promise<{ date: string; soreness: number | null } | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("daily_checkin")
+    .select("date, soreness")
+    .lte("date", today)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) fail("questionnaire du matin", error);
+  return data;
+}
+
+/** Score de forme de démonstration (D16, phase 3) : toujours affiché avec un Chip « démo ». */
+export function getFormDemo() {
+  return FORM_DEMO;
 }
 
 /** Données fictives de la page /design (D16) : toujours affichées avec un Chip « démo ». */

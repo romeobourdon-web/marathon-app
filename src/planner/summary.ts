@@ -60,6 +60,8 @@ export interface VolumePoint {
   plannedKm: number;
   doneKm: number | null; // null = semaine pas encore commencée
   isCurrent: boolean;
+  /** Dans les `phoneWeeks` semaines affichées sur téléphone : celles qui finissent à la semaine en cours. */
+  inPhoneWindow: boolean;
 }
 
 /** Volume hebdo prévu vs réalisé, des semaines passées jusqu'à quelques semaines à venir. */
@@ -70,8 +72,11 @@ export function volumeTrend(
   today: string,
   past = 7,
   ahead = 3,
+  phoneWeeks = 8,
 ): VolumePoint[] {
   const cw = currentWeek(planStart, today);
+  const phoneFrom = Math.max(1, cw - phoneWeeks + 1);
+  const phoneTo = phoneFrom + phoneWeeks - 1;
   const points: VolumePoint[] = [];
   for (let w = Math.max(1, cw - past); w <= Math.min(TOTAL_WEEKS, cw + ahead); w++) {
     const ws = sessions.filter((s) => s.week === w);
@@ -80,6 +85,7 @@ export function volumeTrend(
       plannedKm: sum(ws.map((s) => s.distanceKm)),
       doneKm: w > cw ? null : doneKmForWeek(activities, planStart, w),
       isCurrent: w === cw,
+      inPhoneWindow: w >= phoneFrom && w <= phoneTo,
     });
   }
   return points;

@@ -63,3 +63,8 @@ export function lineGeometry(values: number[], refs: number[], options: { invert
   const x = (i: number) => (values.length === 1 ? 50 : round2((i / (values.length - 1)) * 100));
   return { points: values.map((v, i) => ({ x: x(i), y: y(v) })), refY: refs.map(y) };
 }
+
+/** Haut d'échelle « rond » : le plus petit multiple de `step` qui couvre toutes les valeurs (au moins `step`). */
+export function niceScaleMax(values: number[], step: number): number {
+  return Math.max(step, Math.ceil(Math.max(0, ...values) / step) * step);
+}

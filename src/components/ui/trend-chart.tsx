@@ -16,6 +16,8 @@ export type TrendBar = {
   ariaLabel: string;
   /** Info-bulle au survol / au focus (téléphone : au tap). */
   tooltip?: { title: string; lines: string[] };
+  /** Masquée sur téléphone (fenêtre décidée par planner/) ; prioritaire sur `mobileLast`. */
+  hiddenOnPhone?: boolean;
 };
 
 type LineProps = {
@@ -53,7 +55,9 @@ export function TrendChart(props: TrendChartProps) {
 }
 
 function Bars({ bars, grid, mobileLast = 8, ariaLabel }: BarsProps) {
-  const hiddenOnPhone = (i: number) => (i < bars.length - mobileLast ? "max-lg:hidden" : "");
+  // Plus de 16 barres (tout le plan sur PC) : un libellé d'axe sur deux, la semaine en cours toujours.
+  const dense = bars.length > 16;
+  const hiddenOnPhone = (i: number) => ((bars[i].hiddenOnPhone ?? i < bars.length - mobileLast) ? "max-lg:hidden" : "");
   return (
     <figure aria-label={ariaLabel}>
       <div className="relative h-40 lg:h-50">
@@ -63,7 +67,7 @@ function Bars({ bars, grid, mobileLast = 8, ariaLabel }: BarsProps) {
           </div>
         ))}
         <div className="absolute inset-x-0 bottom-0 border-t-(length:--border-hairline) border-plan-edge" aria-hidden="true" />
-        <ol className="absolute inset-y-0 right-10 left-0 flex items-end gap-2 lg:gap-2.5">
+        <ol className={`absolute inset-y-0 right-10 left-0 flex items-end gap-2 ${dense ? "lg:gap-1.5" : "lg:gap-2.5"}`}>
           {bars.map((b, i) => (
             <li
               key={b.label}
@@ -102,9 +106,14 @@ function Bars({ bars, grid, mobileLast = 8, ariaLabel }: BarsProps) {
           ))}
         </ol>
       </div>
-      <div className="mt-2 mr-10 flex gap-2 lg:gap-2.5" aria-hidden="true">
+      <div className={`mt-2 mr-10 flex gap-2 ${dense ? "lg:gap-1.5" : "lg:gap-2.5"}`} aria-hidden="true">
         {bars.map((b, i) => (
-          <span key={b.label} className={`flex-1 text-center text-caption tabular-nums ${b.isCurrent ? "font-bold text-text" : "text-text-subtle"} ${hiddenOnPhone(i)}`}>
+          <span
+            key={b.label}
+            className={`min-w-0 flex-1 text-center text-caption tabular-nums ${b.isCurrent ? "font-bold text-text" : "text-text-subtle"} ${hiddenOnPhone(i)} ${
+              dense && i % 2 === 1 && !b.isCurrent ? "lg:invisible" : ""
+            }`}
+          >
             {b.label}
           </span>
         ))}

@@ -73,4 +73,10 @@ describe("weekSummary et volumeTrend", () => {
       [3, null],
     ]);
   });
+  it("fenêtre téléphone : les 8 semaines qui finissent à la semaine en cours (dès le début du plan : S1 à S8)", () => {
+    const all = volumeTrend([], [], PLAN_START, "2026-11-18", 30, 30);
+    expect(all.filter((p) => p.inPhoneWindow).map((p) => p.week)).toEqual([2, 3, 4, 5, 6, 7, 8, 9]);
+    const early = volumeTrend([], [], PLAN_START, "2026-09-30", 30, 30);
+    expect(early.filter((p) => p.inPhoneWindow).map((p) => p.week)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  });
 });
