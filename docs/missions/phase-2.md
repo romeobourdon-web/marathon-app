@@ -81,3 +81,52 @@ Maquettes : docs/maquettes/seances-et-detail.md (+ t42-reference.css). DESIGN.md
 4. Retire les anciennes pages /seances du prototype une fois remplacées (D25).
 ```
 **Fin :** les deux écrans conformes à 390 et 1280 px avec les vraies données, lint/build/tests.
+
+---
+
+## P2-M6 — Journal, questionnaire du matin et saisie après séance · Opus
+
+```
+Maquettes : docs/maquettes/journal-plan-echeances.md (sections Journal et Saisie). DESIGN.md §6 « Journal ». D20, D33.
+1. Migration (db:backup avant) : journal_entry.pain smallint 1-5 (douleur Achille) ; daily_checkin.soreness devient la douleur Achille (renomme en pain si plus clair, avec la migration des données).
+2. /journal en v2.2 : carte « Questionnaire du matin » (1 par jour, upsert sur la date, modifiable), puis « Entrées récentes » (séances réalisées, hors plan et non réalisées avec un journal). 2 colonnes sur PC.
+3. Saisie après séance : écran plein sur téléphone (/journal/saisie?activity=… ou ?session=… pour une séance non faite), panneau latéral de 480 px sur PC. Pré-remplissage depuis device_feel / device_rpe (conversion Garmin → 1-5 et 1-10 dans engine/, testée). Enregistrement par server action via db/repository.
+4. Liens : bouton « Questionnaire du matin » d'Aujourd'hui → questionnaire ; « Ajouter mon ressenti » / « Modifier » du détail d'une séance → saisie. Aujourd'hui et le détail affichent ensuite les vraies réponses.
+5. Retire l'ancienne page /journal du prototype (D25).
+```
+**Fin :** remplir le questionnaire et un journal depuis l'app, les relire sur Journal, Aujourd'hui et le détail ; données en base ; 390 et 1280 px.
+
+---
+
+## P2-M7 — Plan · Opus
+
+```
+Maquettes : docs/maquettes/journal-plan-echeances.md (section Plan). DESIGN.md §6 « Plan ».
+1. /plan en v2.2 : PhaseTimeline, semaine en cours dépliée en premier (téléphone) avec lien « Aujourd'hui », phases avec leurs semaines repliées (téléphone) ou dépliées en 2 colonnes (PC, 4 dernières semaines de la phase en cours seulement, les autres regroupées « afficher »).
+2. Par semaine : réalisé / prévu (D28 : toutes les courses), statut ✓ / ↑ / ! calculé par planner/ (réutilise week-status), « allégée » si semaine allégée. Par séance : réalisé / prévu, pastille ✓ ✕ •, ligne d'écart « Δ allure … · FC … » seulement hors zone. Tap sur une séance → /seances/[id].
+3. Retire l'ancienne page /plan du prototype (D25).
+```
+**Fin :** /plan conforme à 390 et 1280 px avec les vraies données (30 semaines), lint/build/tests.
+
+---
+
+## P2-M8 — Échéances + saisie manuelle d'une sortie · Opus
+
+```
+Maquettes : docs/maquettes/journal-plan-echeances.md (section Échéances). DESIGN.md §6 « Échéances ». D18, D33.
+1. Migration (db:backup avant) : event.kind ('race' | 'test'), event.activity_id → activity (résultat d'une échéance passée). Ajoute en base le « 5 km de référence » du 2026-04-04 (kind test, lié à l'activité Garmin de ce jour). Ne crée AUCUNE échéance fictive (les tests 10 km / semi de la maquette sont des exemples).
+2. /echeances : course cible en tête (ring-acc, J-n en accent-ink), échéances à venir, « Passées » avec le temps réalisé, bouton « Ajouter une échéance » → formulaire (nom, date, distance, objectif de temps, course ou test) : écran plein sur téléphone, panneau latéral sur PC (même gabarit que la saisie après séance). Sur PC : PhaseTimeline avec les repères d'échéances et d'aujourd'hui.
+3. Saisie manuelle d'une sortie (D18, D33) : bouton secondary « Ajouter une sortie » en haut de /seances → formulaire (date, heure, sport, distance, durée, FC moyenne facultative), même gabarit ; source = 'manual', puis recalcul des liaisons.
+```
+**Fin :** ajouter une échéance et une sortie manuelle depuis l'app, les voir dans Échéances / Séances / Aujourd'hui ; lint/build/tests.
+
+---
+
+## P2-M9 — Nettoyage et contrôle de fin de phase 2 · Sonnet
+
+```
+1. D25 : supprime le route group (prototype) restant, components/ui.tsx, nav.tsx, volume-chart.tsx, la classe .theme-prototype, les polices et formats marqués @deprecated, et tout code devenu mort. /design reste.
+2. Vérifie les 5 onglets + détail + saisies à 390 et 1280 px : aucune couleur ou taille en dur hors tokens, aucun chiffre en dur, contrastes AA, focus visible.
+3. Mets à jour docs/ARCHITECTURE.md (§3 composants, §4 schéma : colonnes ajoutées en P2-M6 et P2-M8) et coche la phase 2 dans ROADMAP.md.
+```
+**Fin :** plus aucun fichier du prototype, lint/build/tests, docs à jour.
