@@ -35,6 +35,49 @@ Mission P2-M3. Lis docs/DESIGN.md (v2.1) en entier, D24, D25, D27. Référence v
 
 ---
 
+## P2-M3b — Sécurité Next.js + D30 · Sonnet
+
+```
+1. Sécurité : Next.js 16.4.2 a une faille connue (alerte de l'overlay de dev). Lance `npx next upgrade --agent=security` et suis ses instructions pour passer à la version corrigée de la même version majeure (16.x). Annonce la version dans ton résumé. Relis AGENTS.md après la mise à jour.
+2. D30 : dans planner/link, une liaison à ± 1 jour reste dans la même semaine du plan (lundi → dimanche). Test : 10,5 km un lundi ne réalise pas la sortie longue de la veille. db:backup, puis applique aux données (cas du 18-19 oct.).
+```
+**Fin :** plus d'alerte de sécurité dans l'overlay, test D30 vert.
+
+---
+
+## P2-M3c — Données complètes (D31, D32) · Opus
+
+```
+1. Synchro (D31) : chaque npm run sync relit au minimum les 14 derniers jours et met à jour les activités existantes (sport, distance, durées, FC…), puis recalcule les liaisons automatiques (D29).
+2. Libellés de sport en français dans lib/format.ts (running → Course, treadmill_running → Tapis, trail_running → Trail, cycling → Vélo, soccer/football → Football, walking → Marche, hiking → Randonnée, stand_up_paddleboarding → Paddle, autre → Autre). Vérifie dans samples/ ou en base le typeKey Garmin réel du football.
+3. Import téléphone (D32) : scripts/import-phone-runs.ts + npm run import:phone. Lit data/imports/strava-phone-runs.json, insère chaque sortie avec source = 'manual', source_id = 'strava:<id>', start_time converti depuis Europe/Paris, pas de séries temporelles. Idempotent (UNIQUE source, source_id). Saute toute sortie dont le départ est à ± 30 min d'une activité Garmin, et la liste. db:backup avant, puis lance l'import et recalcule les liaisons.
+4. Vérification : rends le tableau des km par semaine du plan S1 à S9 (course uniquement, D28) avant/après import. Attendu après import (QG, depuis Strava) : S1 39,1 · S2 42,4 · S3 29,6 · S4 36,0 · S5 51,1 · S6 47,4 · S7 48,0 · S8 43,0 hors foot · S9 selon la synchro. Explique tout écart > 0,5 km.
+```
+**Fin :** 47 sorties importées (ou la liste de celles sautées), totaux hebdo conformes, les activités de foot présentes en base avec leur sport.
+
+---
+
 ## P2-M4 — Écran Aujourd'hui · Opus
 
-À préparer au QG après P2-M3. Maquettes : docs/maquettes/Today-390.html et Today-1280.html.
+```
+Maquettes : docs/maquettes/Today-390.html et Today-1280.html (chiffres fictifs). DESIGN.md v2.2 §6 « Aujourd'hui ».
+1. Sors / du route group (prototype) : nouvelle page / en v2.2, avec AppNav (5 destinations ; les écrans pas encore migrés restent accessibles tels quels, /echeances peut afficher « bientôt »).
+2. Cartes, dans l'ordre de la maquette : StatusBand · Séance du jour (règle « jour de repos » → « Prochaine séance ») · Forme · Cette semaine · Focus endurance · Tendance du volume (8 semaines sur téléphone, tout le plan sur PC). Grille 6 colonnes sur PC selon la maquette.
+3. Forme : le score reste « démo » (D16, phase 3) mais les 4 Stat utilisent les vraies valeurs de wellness et du dernier questionnaire si elles existent (sinon « — »). Le bouton « Questionnaire du matin » est le seul primary ; il mène à /journal tant que la saisie n'existe pas.
+4. Cette semaine : réalisé = toutes les courses (D28), pastilles par jour, et la ligne « + n activités hors plan (sport, km) » (D31).
+5. Tous les chiffres viennent de engine/ ou planner/ (ajoute les fonctions manquantes, avec tests) ; l'UI ne calcule rien. Vérifie à 390 et 1280 px.
+```
+**Fin :** / conforme aux maquettes avec les vraies données, aucun chiffre en dur, lint/build/tests.
+
+---
+
+## P2-M5 — Séances + détail · Opus
+
+```
+Maquettes : docs/maquettes/seances-et-detail.md (+ t42-reference.css). DESIGN.md §6 « Séances » et « Détail ».
+1. /seances en v2.2 : filtres (Toutes · Course · Hors plan · Non réalisées), groupes par semaine du plan puis « Avant le plan », cartes réalisée / non réalisée / hors plan (D31), écarts signés seulement hors zone.
+2. /seances/[id] : en-tête, Prévu/réalisé (+ durée, D+, cadence × 2), Mon ressenti (ou bouton « Ajouter mon ressenti » → /journal), Allure et FC par km avec zone visée (TrendChart line), Tours km par km, Analyse du coach « phase 3 ». Une activité sans séries (import téléphone) n'affiche que Prévu/réalisé et ressenti.
+3. engine/ : découpage km par km depuis activity_stream (allure, FC), détection « dérive en fin » (FC au-dessus de la zone sur les 3 derniers km), avec tests.
+4. Retire les anciennes pages /seances du prototype une fois remplacées (D25).
+```
+**Fin :** les deux écrans conformes à 390 et 1280 px avec les vraies données, lint/build/tests.

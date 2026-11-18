@@ -1,0 +1,477 @@
+{
+ "_comment": "Sorties enregistrées au téléphone (app Strava), absentes de Garmin. Extraites par le QG via le connecteur Strava le 2026-11-18 (D18, D31). Résumés seulement : pas de GPS, pas de FC (le téléphone n'en mesure pas). Méthode : une activité Strava sans cadence ni calories = enregistrée au téléphone ; validée en recoupant les totaux hebdomadaires Garmin de l'app (S1 à S8 identiques). Exclus : le doublon téléphone du 2026-05-15 (même sortie que Garmin) et une activité vide du 2026-09-03.",
+ "count": 47,
+ "total_km": 333.3,
+ "activities": [
+  {
+   "strava_id": "18186425708",
+   "start_local": "2026-04-20T18:30:52",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 4643.4,
+   "moving_time_s": 1204,
+   "elapsed_time_s": 1312,
+   "elevation_gain_m": 60.1
+  },
+  {
+   "strava_id": "18201603363",
+   "start_local": "2026-04-21T19:20:15",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 9694.4,
+   "moving_time_s": 2692,
+   "elapsed_time_s": 2761,
+   "elevation_gain_m": 75.5
+  },
+  {
+   "strava_id": "18214744969",
+   "start_local": "2026-04-22T18:45:39",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 4517.8,
+   "moving_time_s": 1265,
+   "elapsed_time_s": 1640,
+   "elevation_gain_m": 52.5
+  },
+  {
+   "strava_id": "18241646278",
+   "start_local": "2026-04-24T18:37:48",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 10525.9,
+   "moving_time_s": 2702,
+   "elapsed_time_s": 2702,
+   "elevation_gain_m": 10.0
+  },
+  {
+   "strava_id": "18255765894",
+   "start_local": "2026-04-25T18:41:03",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 12016.2,
+   "moving_time_s": 3251,
+   "elapsed_time_s": 3251,
+   "elevation_gain_m": 8.3
+  },
+  {
+   "strava_id": "18270305185",
+   "start_local": "2026-04-26T20:13:50",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 914.9,
+   "moving_time_s": 185,
+   "elapsed_time_s": 185,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "18296649068",
+   "start_local": "2026-04-28T20:28:36",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 6158.1,
+   "moving_time_s": 1663,
+   "elapsed_time_s": 1901,
+   "elevation_gain_m": 6.5
+  },
+  {
+   "strava_id": "18321782461",
+   "start_local": "2026-04-30T18:50:23",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 7345.9,
+   "moving_time_s": 1948,
+   "elapsed_time_s": 1998,
+   "elevation_gain_m": 6.2
+  },
+  {
+   "strava_id": "18335901660",
+   "start_local": "2026-05-01T18:22:30",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 9123.4,
+   "moving_time_s": 2772,
+   "elapsed_time_s": 2809,
+   "elevation_gain_m": 13.2
+  },
+  {
+   "strava_id": "18350686801",
+   "start_local": "2026-05-02T20:52:44",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 4020.5,
+   "moving_time_s": 889,
+   "elapsed_time_s": 1240,
+   "elevation_gain_m": 2.2
+  },
+  {
+   "strava_id": "18364224320",
+   "start_local": "2026-05-03T20:27:07",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 5031.1,
+   "moving_time_s": 1206,
+   "elapsed_time_s": 1206,
+   "elevation_gain_m": 2.6
+  },
+  {
+   "strava_id": "18373709903",
+   "start_local": "2026-05-04T17:41:51",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 3017.0,
+   "moving_time_s": 970,
+   "elapsed_time_s": 1316,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "18392862726",
+   "start_local": "2026-05-06T01:52:51",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 3076.3,
+   "moving_time_s": 826,
+   "elapsed_time_s": 1000,
+   "elevation_gain_m": 9.1
+  },
+  {
+   "strava_id": "18393173304",
+   "start_local": "2026-05-06T02:15:27",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 5828.0,
+   "moving_time_s": 1715,
+   "elapsed_time_s": 1985,
+   "elevation_gain_m": 19.7
+  },
+  {
+   "strava_id": "18480707028",
+   "start_local": "2026-05-12T19:31:49",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 7148.5,
+   "moving_time_s": 1875,
+   "elapsed_time_s": 1903,
+   "elevation_gain_m": 6.2
+  },
+  {
+   "strava_id": "18495377608",
+   "start_local": "2026-05-13T20:55:41",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 14011.3,
+   "moving_time_s": 3691,
+   "elapsed_time_s": 3722,
+   "elevation_gain_m": 14.1
+  },
+  {
+   "strava_id": "18603039413",
+   "start_local": "2026-05-22T02:59:03",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 6500.3,
+   "moving_time_s": 1967,
+   "elapsed_time_s": 2741,
+   "elevation_gain_m": 23.2
+  },
+  {
+   "strava_id": "18627669828",
+   "start_local": "2026-05-24T01:26:09",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 1609.8,
+   "moving_time_s": 428,
+   "elapsed_time_s": 543,
+   "elevation_gain_m": 3.5
+  },
+  {
+   "strava_id": "18639524975",
+   "start_local": "2026-05-24T21:02:58",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 1240.8,
+   "moving_time_s": 334,
+   "elapsed_time_s": 354,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "18730513681",
+   "start_local": "2026-05-31T15:24:16",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 11757.8,
+   "moving_time_s": 3666,
+   "elapsed_time_s": 4124,
+   "elevation_gain_m": 66.5
+  },
+  {
+   "strava_id": "18791072870",
+   "start_local": "2026-06-05T02:40:29",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 1011.6,
+   "moving_time_s": 269,
+   "elapsed_time_s": 269,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "19003706778",
+   "start_local": "2026-06-21T02:54:30",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 999.8,
+   "moving_time_s": 241,
+   "elapsed_time_s": 241,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "19233349785",
+   "start_local": "2026-07-08T09:25:01",
+   "timezone": "Europe/Paris",
+   "sport": "trail_running",
+   "distance_m": 28228.1,
+   "moving_time_s": 20034,
+   "elapsed_time_s": 24930,
+   "elevation_gain_m": 2316.0
+  },
+  {
+   "strava_id": "19631614932",
+   "start_local": "2026-08-06T20:14:58",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 12000.5,
+   "moving_time_s": 3697,
+   "elapsed_time_s": 3717,
+   "elevation_gain_m": 81.4
+  },
+  {
+   "strava_id": "20136886283",
+   "start_local": "2026-09-12T02:36:05",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 1123.9,
+   "moving_time_s": 505,
+   "elapsed_time_s": 542,
+   "elevation_gain_m": 2.0
+  },
+  {
+   "strava_id": "20161809666",
+   "start_local": "2026-09-13T18:50:45",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 6622.1,
+   "moving_time_s": 1804,
+   "elapsed_time_s": 1827,
+   "elevation_gain_m": 6.3
+  },
+  {
+   "strava_id": "20189428941",
+   "start_local": "2026-09-15T19:40:28",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 9100.5,
+   "moving_time_s": 2609,
+   "elapsed_time_s": 2631,
+   "elevation_gain_m": 9.4
+  },
+  {
+   "strava_id": "20324511583",
+   "start_local": "2026-09-25T15:40:35",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 8970.3,
+   "moving_time_s": 2586,
+   "elapsed_time_s": 2665,
+   "elevation_gain_m": 68.2
+  },
+  {
+   "strava_id": "20331944269",
+   "start_local": "2026-09-26T06:23:14",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 2915.5,
+   "moving_time_s": 2749,
+   "elapsed_time_s": 6506,
+   "elevation_gain_m": 89.4
+  },
+  {
+   "strava_id": "20341525564",
+   "start_local": "2026-09-26T19:57:52",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 8998.9,
+   "moving_time_s": 2414,
+   "elapsed_time_s": 2467,
+   "elevation_gain_m": 10.3
+  },
+  {
+   "strava_id": "20369104833",
+   "start_local": "2026-09-28T21:31:15",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 7616.4,
+   "moving_time_s": 2059,
+   "elapsed_time_s": 2070,
+   "elevation_gain_m": 8.7
+  },
+  {
+   "strava_id": "20422481813",
+   "start_local": "2026-10-02T18:35:00",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 4698.6,
+   "moving_time_s": 1203,
+   "elapsed_time_s": 1226,
+   "elevation_gain_m": 4.1
+  },
+  {
+   "strava_id": "20463428895",
+   "start_local": "2026-10-05T19:09:50",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 6568.1,
+   "moving_time_s": 1695,
+   "elapsed_time_s": 1720,
+   "elevation_gain_m": 9.0
+  },
+  {
+   "strava_id": "20526416479",
+   "start_local": "2026-10-10T12:48:58",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 4722.7,
+   "moving_time_s": 1465,
+   "elapsed_time_s": 1584,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "20558264346",
+   "start_local": "2026-10-12T20:00:18",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 6979.6,
+   "moving_time_s": 1855,
+   "elapsed_time_s": 2019,
+   "elevation_gain_m": 32.7
+  },
+  {
+   "strava_id": "20586352480",
+   "start_local": "2026-10-14T20:03:53",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 10603.4,
+   "moving_time_s": 2894,
+   "elapsed_time_s": 2898,
+   "elevation_gain_m": 12.8
+  },
+  {
+   "strava_id": "20710126976",
+   "start_local": "2026-10-24T11:12:14",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 9028.5,
+   "moving_time_s": 2507,
+   "elapsed_time_s": 2507,
+   "elevation_gain_m": 94.4
+  },
+  {
+   "strava_id": "20716473985",
+   "start_local": "2026-10-24T19:56:18",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 3282.2,
+   "moving_time_s": 730,
+   "elapsed_time_s": 740,
+   "elevation_gain_m": 5.7
+  },
+  {
+   "strava_id": "20735938687",
+   "start_local": "2026-10-26T11:18:55",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 10293.9,
+   "moving_time_s": 3308,
+   "elapsed_time_s": 3606,
+   "elevation_gain_m": 23.0
+  },
+  {
+   "strava_id": "20752486464",
+   "start_local": "2026-10-27T16:07:43",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 6545.5,
+   "moving_time_s": 1627,
+   "elapsed_time_s": 2078,
+   "elevation_gain_m": 9.3
+  },
+  {
+   "strava_id": "20782229990",
+   "start_local": "2026-10-29T18:57:40",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 12385.6,
+   "moving_time_s": 3301,
+   "elapsed_time_s": 3318,
+   "elevation_gain_m": 28.6
+  },
+  {
+   "strava_id": "20794793798",
+   "start_local": "2026-10-30T19:10:21",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 11364.4,
+   "moving_time_s": 3609,
+   "elapsed_time_s": 3609,
+   "elevation_gain_m": 27.5
+  },
+  {
+   "strava_id": "20797717868",
+   "start_local": "2026-10-31T01:59:00",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 1131.4,
+   "moving_time_s": 252,
+   "elapsed_time_s": 252,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "20834152597",
+   "start_local": "2026-11-02T20:35:59",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 10808.1,
+   "moving_time_s": 2783,
+   "elapsed_time_s": 2783,
+   "elevation_gain_m": 11.5
+  },
+  {
+   "strava_id": "20886297555",
+   "start_local": "2026-11-06T19:31:40",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 4427.8,
+   "moving_time_s": 1659,
+   "elapsed_time_s": 3969,
+   "elevation_gain_m": 0.0
+  },
+  {
+   "strava_id": "20892477564",
+   "start_local": "2026-11-07T10:41:45",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 6644.4,
+   "moving_time_s": 2311,
+   "elapsed_time_s": 2317,
+   "elevation_gain_m": 32.9
+  },
+  {
+   "strava_id": "20912244216",
+   "start_local": "2026-11-08T18:12:50",
+   "timezone": "Europe/Paris",
+   "sport": "running",
+   "distance_m": 8064.2,
+   "moving_time_s": 2542,
+   "elapsed_time_s": 2801,
+   "elevation_gain_m": 10.0
+  }
+ ]
+}
