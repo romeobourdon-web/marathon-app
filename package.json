@@ -16,7 +16,8 @@
     "db:types": "supabase gen types typescript --local --schema public > src/db/database.types.ts",
     "sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file=.env.local --import ./scripts/register-paths.mjs scripts/sync.ts",
     "db:backup": "mkdir -p backups && f=backups/$(date +%F).sql && if [ -e \"$f\" ]; then f=backups/$(date +%F-%H%M%S).sql; fi && supabase db dump --data-only --schema public,auth -f \"$f\"",
-    "app": "node scripts/app.mjs"
+    "app": "node scripts/app.mjs",
+    "import:phone": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file=.env.local --import ./scripts/register-paths.mjs scripts/import-phone-runs.ts"
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.221.0",

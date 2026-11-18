@@ -34,3 +34,11 @@ export function combineActivities(runs: CompletedRun[]): CompletedRun | null {
   const avgHr = hrTime > 0 ? Math.round(withHr.reduce((s, r) => s + r.avgHr * r.durationSec, 0) / hrTime) : 0;
   return { distanceKm: Math.round(distanceKm * 1000) / 1000, durationSec, avgPace, avgHr };
 }
+
+/** Écart maximal entre deux départs pour considérer deux enregistrements comme la même sortie (D32). */
+export const SAME_RUN_WINDOW_MIN = 30;
+
+/** Vrai si les deux départs (ISO 8601) sont à ± 30 min l'un de l'autre : même sortie enregistrée deux fois (D32). */
+export function isSameRun(startA: string, startB: string): boolean {
+  return Math.abs(Date.parse(startA) - Date.parse(startB)) <= SAME_RUN_WINDOW_MIN * 60000;
+}

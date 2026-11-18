@@ -120,6 +120,18 @@ export async function getActivitySourceIds(userId: string, source: SyncSource): 
   return new Set(data.map((a) => a.source_id));
 }
 
+/** Départ (ISO 8601) et date de chaque activité d'une source, pour repérer une sortie déjà enregistrée (D32). */
+export async function getActivityStarts(userId: string, source: SyncSource): Promise<{ startTime: string; date: string }[]> {
+  const { data, error } = await createSupabaseAdminClient()
+    .from("activity")
+    .select("start_time, local_date")
+    .eq("user_id", userId)
+    .eq("source", source)
+    .range(0, 9999);
+  if (error) fail("départs des activités", error);
+  return data.map((a) => ({ startTime: a.start_time, date: a.local_date }));
+}
+
 export interface LinkState {
   /** Début du plan actif (la base fait foi, D11). */
   planStart: string;
@@ -130,8 +142,8 @@ export interface LinkState {
 }
 
 /**
- * État de la liaison prévu ↔ réalisé entre deux dates (incluses) : séances du plan actif, activités garmin
- * et liaisons existantes. Sert à planner/computeAutoLinks (D28, D29).
+ * État de la liaison prévu ↔ réalisé entre deux dates (incluses) : séances du plan actif, vraies activités
+ * (Garmin et import téléphone, D32 ; pas les fictives) et liaisons existantes. Sert à planner/computeAutoLinks (D28 à D30).
  */
 export async function getLinkState(userId: string, from: string, to: string): Promise<LinkState> {
   const admin = createSupabaseAdminClient();
@@ -148,7 +160,7 @@ export async function getLinkState(userId: string, from: string, to: string): Pr
     .from("activity")
     .select("id, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, session_link (id, planned_session_id, method)")
     .eq("user_id", userId)
-    .eq("source", "garmin")
+    .neq("source", "mock")
     .gte("local_date", from)
     .lte("local_date", to)
     .range(0, 9999);

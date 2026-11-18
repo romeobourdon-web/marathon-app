@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { combineActivities, countsForPlan, isWalk } from "@/engine/activity";
+import { combineActivities, countsForPlan, isSameRun, isWalk } from "@/engine/activity";
 
 describe("isWalk (D28)", () => {
   it("une course plus lente que 9'00/km est de la marche", () => {
@@ -40,5 +40,13 @@ describe("combineActivities (D28)", () => {
     const one = { distanceKm: 10, durationSec: 3000, avgPace: 300, avgHr: 150 };
     expect(combineActivities([one])).toBe(one);
     expect(combineActivities([])).toBeNull();
+  });
+});
+
+describe("isSameRun (D32)", () => {
+  it("même sortie si les départs sont à ± 30 min", () => {
+    expect(isSameRun("2026-05-15T16:00:00Z", "2026-05-15T16:29:00Z")).toBe(true);
+    expect(isSameRun("2026-05-15T16:30:00Z", "2026-05-15T16:00:00Z")).toBe(true);
+    expect(isSameRun("2026-05-15T16:00:00Z", "2026-05-15T16:31:00Z")).toBe(false);
   });
 });

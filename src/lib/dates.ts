@@ -22,6 +22,31 @@ export function mondayOf(isoDate: string): string {
   return addDays(isoDate, -((weekday + 6) % 7));
 }
 
+/** Décalage (minutes) de l'heure de Paris par rapport à UTC à un instant donné (+60 l'hiver, +120 l'été). */
+function parisOffsetMinutes(utcMs: number): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Paris",
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(new Date(utcMs));
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  const asUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  return Math.round((asUtc - utcMs) / 60000);
+}
+
+/** Heure locale de Paris (« AAAA-MM-JJTHH:MM:SS ») → instant ISO 8601 en UTC. */
+export function parisLocalToUtcIso(local: string): string {
+  const naive = Date.parse(`${local}Z`);
+  let utc = naive - parisOffsetMinutes(naive) * 60000;
+  utc = naive - parisOffsetMinutes(utc) * 60000; // autour d'un changement d'heure
+  return new Date(utc).toISOString();
+}
+
 /** Date du jour à Paris, au format "AAAA-MM-JJ". */
 export function todayInParis(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {

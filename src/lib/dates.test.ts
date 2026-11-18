@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, dateChunks, daysBetween, mondayOf, splitWeeksDays, todayInParis } from "@/lib/dates";
+import { addDays, dateChunks, daysBetween, mondayOf, parisLocalToUtcIso, splitWeeksDays, todayInParis } from "@/lib/dates";
 
 describe("dates", () => {
   it("addDays traverse les mois et les années", () => {
@@ -41,5 +41,13 @@ describe("mondayOf", () => {
     expect(mondayOf("2026-10-18")).toBe("2026-10-12"); // dimanche
     expect(mondayOf("2026-10-19")).toBe("2026-10-19"); // lundi
     expect(mondayOf("2026-10-17")).toBe("2026-10-12"); // samedi
+  });
+});
+
+describe("parisLocalToUtcIso", () => {
+  it("convertit l'heure de Paris en UTC, été (+2) comme hiver (+1)", () => {
+    expect(parisLocalToUtcIso("2026-04-20T18:30:52")).toBe("2026-04-20T16:30:52.000Z");
+    expect(parisLocalToUtcIso("2026-11-14T08:00:00")).toBe("2026-11-14T07:00:00.000Z");
+    expect(parisLocalToUtcIso("2026-01-01T00:30:00")).toBe("2025-12-31T23:30:00.000Z");
   });
 });
