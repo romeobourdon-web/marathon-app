@@ -1,11 +1,11 @@
 // Liaison automatique prévu ↔ réalisé (D28, D29) :
 //  1. le jour même : chaque course éligible est liée à la séance prévue de sa date (plusieurs activités possibles, agrégées) ;
 //  2. sinon : une séance prévue NON liée à ± 1 jour, la plus proche en distance, à condition que l'activité
-//     fasse au moins 50 % de la distance prévue (D29).
+//     fasse au moins 50 % de la distance prévue (D29), et dans la même semaine du plan, lundi → dimanche (D30).
 // Seules les courses éligibles au plan sont liées (D22 : pas d'autre sport ; D28 : pas de marche).
 // Les liaisons automatiques sont recalculées entièrement à chaque synchro ; les liaisons manuelles ne bougent jamais (D29).
 
-import { daysBetween } from "@/lib/dates";
+import { daysBetween, mondayOf } from "@/lib/dates";
 
 /** Part minimale de la distance prévue pour une liaison à ± 1 jour (D29). */
 export const NEIGHBOUR_MIN_SHARE = 0.5;
@@ -55,12 +55,13 @@ export function computeAutoLinks(sessions: LinkableSession[], activities: Linkab
     }
   }
 
-  // 2. Une séance non liée à ± 1 jour, assez proche en distance (≥ 50 % du prévu), la plus proche
+  // 2. Une séance non liée à ± 1 jour de la même semaine (D30), assez proche en distance (≥ 50 % du prévu), la plus proche
   for (const a of remaining) {
     const candidates = sessions.filter(
       (s) =>
         !takenSessions.has(s.id) &&
         Math.abs(daysBetween(a.date, s.date)) === 1 &&
+        mondayOf(a.date) === mondayOf(s.date) &&
         a.distanceKm >= NEIGHBOUR_MIN_SHARE * s.distanceKm,
     );
     if (candidates.length === 0) continue;

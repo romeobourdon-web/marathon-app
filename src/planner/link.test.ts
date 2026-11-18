@@ -76,3 +76,17 @@ describe("computeAutoLinks — seuil et recalcul (D29)", () => {
     expect(toDelete).not.toContainEqual(manual[0]);
   });
 });
+
+describe("computeAutoLinks — même semaine du plan (D30)", () => {
+  it("10,5 km le lundi 19 oct. ne réalise pas la sortie longue du dimanche 18 oct.", () => {
+    expect(computeAutoLinks([session("sl", "2026-10-18", 18)], [activity("mon", "2026-10-19", 10.5)])).toEqual([]);
+  });
+
+  it("une course le samedi réalise toujours la séance du dimanche de la même semaine", () => {
+    expect(computeAutoLinks([session("sl", "2026-10-18", 18)], [activity("sat", "2026-10-17", 16)])).toEqual([{ activityId: "sat", sessionId: "sl" }]);
+  });
+
+  it("une séance du lundi ne prend pas une course du dimanche précédent", () => {
+    expect(computeAutoLinks([session("mon", "2026-10-19", 8)], [activity("sun", "2026-10-18", 8)])).toEqual([]);
+  });
+});

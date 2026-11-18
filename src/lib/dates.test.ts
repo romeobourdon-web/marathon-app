@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, dateChunks, daysBetween, splitWeeksDays, todayInParis } from "@/lib/dates";
+import { addDays, dateChunks, daysBetween, mondayOf, splitWeeksDays, todayInParis } from "@/lib/dates";
 
 describe("dates", () => {
   it("addDays traverse les mois et les années", () => {
@@ -33,5 +33,13 @@ describe("dateChunks", () => {
   it("renvoie une seule tranche si la plage est courte, aucune si elle est vide", () => {
     expect(dateChunks("2026-04-04", "2026-04-04", 31)).toEqual([{ from: "2026-04-04", to: "2026-04-04" }]);
     expect(dateChunks("2026-04-05", "2026-04-04", 31)).toEqual([]);
+  });
+});
+
+describe("mondayOf", () => {
+  it("renvoie le lundi de la semaine lundi → dimanche", () => {
+    expect(mondayOf("2026-10-18")).toBe("2026-10-12"); // dimanche
+    expect(mondayOf("2026-10-19")).toBe("2026-10-19"); // lundi
+    expect(mondayOf("2026-10-17")).toBe("2026-10-12"); // samedi
   });
 });

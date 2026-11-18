@@ -16,6 +16,12 @@ export function daysBetween(a: string, b: string): number {
   return Math.round((toUtc(b) - toUtc(a)) / DAY_MS);
 }
 
+/** Lundi de la semaine (lundi → dimanche) qui contient la date. */
+export function mondayOf(isoDate: string): string {
+  const weekday = new Date(toUtc(isoDate)).getUTCDay(); // 0 = dimanche
+  return addDays(isoDate, -((weekday + 6) % 7));
+}
+
 /** Date du jour à Paris, au format "AAAA-MM-JJ". */
 export function todayInParis(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
