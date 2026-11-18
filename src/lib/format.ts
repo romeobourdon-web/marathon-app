@@ -146,3 +146,20 @@ const dateFormatters = {
 export function formatDate(isoDate: string, style: "short" | "long" | "full" = "short"): string {
   return dateFormatters[style].format(new Date(`${isoDate}T00:00:00Z`));
 }
+
+const SPORT_LABELS: Record<string, string> = {
+  running: "Course",
+  treadmill_running: "Tapis",
+  trail_running: "Trail",
+  cycling: "Vélo",
+  soccer: "Football",
+  football: "Football",
+  walking: "Marche",
+  hiking: "Randonnée",
+  stand_up_paddleboarding: "Paddle",
+};
+
+/** Libellé français d'un sport (typeKey Garmin ; suffixe de version « _v2 » ignoré) (D31). */
+export function formatSport(sport: string): string {
+  return SPORT_LABELS[sport.replace(/_v\d+$/, "")] ?? "Autre";
+}

@@ -1,7 +1,8 @@
 // Conversion des lignes de la base (mesures brutes : m, s, m/s, bpm) vers les types métier
 // utilisés par planner/ et les écrans. Fonctions pures, testées.
 
-import type { Tables } from "@/db/database.types";
+import type { NeutralActivity } from "@/connectors/types";
+import type { Json, Tables, TablesInsert } from "@/db/database.types";
 import type { ActivityRecord, ActivityResult, CompletedRun, JournalEntry, Race } from "@/db/types";
 import { combineActivities } from "@/engine/activity";
 import { paceFromSpeed, targetPace } from "@/engine/pace";
@@ -99,5 +100,26 @@ export function toActivityRecord(a: ActivityRow): ActivityRecord {
     durationSec: a.moving_time_s ?? 0,
     avgPace: paceFromSpeed(a.avg_speed_mps ?? 0),
     avgHr: a.avg_hr,
+  };
+}
+
+/** Activité neutre (connectors/) → ligne à écrire (user_id ajouté par le repository). */
+export function toActivityInput(source: TablesInsert<"activity">["source"], a: NeutralActivity): Omit<TablesInsert<"activity">, "user_id"> {
+  return {
+    source,
+    source_id: a.sourceId,
+    start_time: a.startTime,
+    local_date: a.localDate,
+    sport: a.sport,
+    distance_m: a.distanceM,
+    moving_time_s: a.movingTimeS,
+    elapsed_time_s: a.elapsedTimeS,
+    avg_hr: a.avgHr,
+    max_hr: a.maxHr,
+    avg_speed_mps: a.avgSpeedMps,
+    elevation_gain_m: a.elevationGainM,
+    device_rpe: a.deviceRpe,
+    device_feel: a.deviceFeel,
+    raw: a.raw as Json,
   };
 }

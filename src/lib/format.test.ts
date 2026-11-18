@@ -10,6 +10,7 @@ import {
   formatPaceValue,
   formatWeeksDays,
   formatSignedDelta,
+  formatSport,
 } from "./format";
 
 const NBSP = " ";
@@ -92,5 +93,16 @@ describe("formatWeeksDays", () => {
     expect(formatWeeksDays(22, 1)).toBe(`22${NBSP}semaines et 1${NBSP}jour`);
     expect(formatWeeksDays(1, 0)).toBe(`1${NBSP}semaine et 0${NBSP}jour`);
     expect(formatWeeksDays(3, 4)).toBe(`3${NBSP}semaines et 4${NBSP}jours`);
+  });
+});
+
+describe("formatSport (D31)", () => {
+  it("traduit les sports connus, ignore le suffixe de version, « Autre » sinon", () => {
+    expect(formatSport("running")).toBe("Course");
+    expect(formatSport("treadmill_running")).toBe("Tapis");
+    expect(formatSport("soccer")).toBe("Football");
+    expect(formatSport("stand_up_paddleboarding_v2")).toBe("Paddle");
+    expect(formatSport("cycling")).toBe("Vélo");
+    expect(formatSport("yoga")).toBe("Autre");
   });
 });
