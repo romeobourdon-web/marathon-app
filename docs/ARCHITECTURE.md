@@ -35,20 +35,20 @@ Un dossier n'est créé que lorsqu'il reçoit du code (pas de dossier vide).
 
 | Dossier | Rôle | Règles |
 |---|---|---|
-| `src/connectors/` | Accès aux sources : Garmin Personal API (D13) ; plan B = import de fichiers .FIT — phase 1 | Même interface `DataSource` pour toutes les sources, types neutres en sortie. Aucun autre module ne connaît Garmin. Lecture seule. |
-| `src/db/` | `types.ts` (types des données), `repository.ts` (seul point d'accès aux données pour l'UI), `seed/` | `seed/reference.ts` = données réelles de référence (course, profil athlète, zones). `seed/mock/` = données fictives, et seulement là. |
+| `src/connectors/` | Accès aux sources : Garmin Personal API (D13) ; import des sorties au téléphone (`phone-import.ts`, D32) ; saisie manuelle d'une sortie (`manual.ts`, D18) | Types neutres en sortie (`NeutralActivity`…). Aucun autre module ne connaît Garmin ni Strava. Lecture seule côté sources. |
+| `src/db/` | `types.ts` (types des données), `repository.ts` (seul point d'accès aux données : lectures des écrans, écritures des formulaires et de la synchro), `mappers.ts`, `relink.ts` (recalcul des liaisons, partagé par la synchro, l'import et la saisie manuelle), `seed/` | `seed/reference.ts` = données réelles de référence (course, profil athlète, zones). `seed/mock/` = données fictives (score de forme démo, page `/design`), et seulement là. Écritures depuis l'app : session de l'utilisateur (RLS) ; `relink` et les scripts : client admin, côté serveur uniquement. |
 | `supabase/` (racine) | Migrations SQL et configuration Supabase CLI — phase 1 | Migrations versionnées. |
-| `scripts/` (racine) | Commandes ponctuelles : sonde Garmin, seed, `npm run sync` | Pas de logique métier : orchestre `connectors/` et `db/repository`. |
+| `scripts/` (racine) | Commandes ponctuelles : sonde Garmin, seed, `npm run sync`, `npm run import:phone`, lanceur `npm run app` | Pas de logique métier : orchestre `connectors/` et `db/`. |
 | `samples/` (racine) | Réponses brutes de l'API pour l'exploration | **Ignoré par git**, jamais commité (traces GPS). |
 | `src/engine/` | Calculs : écarts, statuts, pourcentages ; plus tard temps par zone, charge, forme/fatigue, découplage FC/allure, prédictions | Fonctions pures, pas de réseau ni de base de données, tests obligatoires (`*.test.ts`, vitest). Formules référencées dans `SCIENCE.md` (à venir). |
-| `src/planner/` | Génération du plan (`buildPlan`), calendrier (semaine courante, phases), liaison prévu↔réalisé, résumés de semaine, règles d'adaptation | Fonctions pures qui reçoivent les données en argument. Le plan est une donnée, pas du texte (voir D11). |
+| `src/planner/` | Génération du plan (`buildPlan`), calendrier (semaine courante, phases), liaison prévu↔réalisé (`link.ts`, D28 à D30), résumés de semaine, données des écrans : `today.ts` (Aujourd'hui), `feed.ts` (Séances), `plan-view.ts` (Plan), `events.ts` (Échéances) ; plus tard règles d'adaptation | Fonctions pures qui reçoivent les données en argument. Le plan est une donnée, pas du texte (voir D11). |
 | `src/coach/` | Prompts et outils du coach IA (phase 3) | Outils en lecture seule + un outil « proposer une modification », toujours validée par Roméo. |
-| `src/lib/` | Utilitaires neutres : dates (`dates.ts`), formatage d'affichage (`format.ts`) | Fonctions pures, sans notion métier. |
-| `src/app/`, `src/components/` | Écrans et design system (`src/components/ui/` = composants de `DESIGN.md`) | Aucun calcul métier dans l'UI : les écrans appellent `db/repository`, `planner/`, `engine/` et `lib/`, puis affichent. Les composants `ui/` reçoivent tout en props et n'importent jamais `db/`, `engine/` ni `planner/`. |
+| `src/lib/` | Utilitaires neutres : dates (`dates.ts`), formatage d'affichage (`format.ts`), lecture des champs de formulaire (`form.ts`) | Fonctions pures, sans notion métier. |
+| `src/app/`, `src/components/` | Écrans : `/` Aujourd'hui, `/plan`, `/seances` (+ `/seances/[id]`, `/seances/ajout`), `/journal` (+ `/journal/matin`, `/journal/saisie`), `/echeances` (+ `/echeances/ajout`), `/design`, `/login`. Design system v2.2 dans `src/components/ui/` : les 13 composants de `DESIGN.md` §5 + `AppNav`, `BottomNav`, `Sheet` (formulaire : écran plein sur téléphone, panneau 480 px sur PC, D33), correspondances de tons (`session-type.ts`, `week-status.ts`, `tone.ts`). Enregistrements par server actions (`actions.ts` de chaque écran). | Aucun calcul métier dans l'UI : les écrans appellent `db/repository`, `planner/`, `engine/` et `lib/`, puis affichent. Les composants `ui/` reçoivent tout en props et n'importent jamais `db/`, `engine/` ni `planner/` (seulement leurs types). Le prototype v0 a été retiré (D25, P2-M9). |
 
 ### Règles de dépendance
 - `engine/`, `planner/` et `lib/` ne lisent jamais la base ni le réseau : les données leur sont passées en argument.
-- `db/repository.ts` est le seul module qui sait d'où viennent les données (aujourd'hui : `seed/` ; demain : Supabase).
+- `db/repository.ts` est le seul module qui sait d'où viennent les données (Supabase local ; `seed/` pour l'initialisation).
 - Le plan est **généré** par `planner/buildPlan` à partir de `seed/reference.ts`, puis inséré en base. Ensuite, c'est la base qui fait foi (D11).
 
 ## 4. Modèle de données (V1 — D14, ajusté après la sonde M1 : D19 à D21, voir `GARMIN.md`)
@@ -59,6 +59,7 @@ Principes : `user_id` + RLS sur chaque table · mesures brutes uniquement (m, s,
 ── Référence ─────────────────────────────────────────
 athlete_profile   user_id PK · hr_max · hr_rest? · zones jsonb (TrainingZones) · goal_event_id → event
 event             id · name · date · distance_m · target_time_s · priority (A/B/C)
+                  · kind (race|test, D33) · activity_id? → activity (résultat d'une échéance passée, D33)
 
 ── Prévu (D11 : généré par buildPlan, puis la base fait foi) ──
 plan              id · name · start_date · is_active · generator_version
@@ -69,6 +70,7 @@ planned_session   id · plan_id → plan · phase_id → plan_phase · date · w
 
 ── Réalisé (source : Garmin, D13) ─────────────────────
 activity          id · source (garmin|fit_file|manual|mock) · source_id · UNIQUE(source, source_id)
+                  (manual : import téléphone « strava:<id> », D32, ou saisie dans l'app « manual:<uuid> », D18)
                   · start_time timestamptz · local_date · sport · distance_m · moving_time_s · elapsed_time_s
                   · avg_hr · max_hr · avg_speed_mps · elevation_gain_m
                   · device_rpe? · device_feel? (ressenti saisi sur la montre, D20) · raw jsonb (GPS conservé, D19)
@@ -79,8 +81,10 @@ sync_run          id · source · started_at · finished_at · status · range_f
 ── Liaison & ressenti ────────────────────────────────
 session_link      id · planned_session_id → planned_session · activity_id → activity (UNIQUE) · method (auto|manual)
 journal_entry     id · activity_id? → activity (UNIQUE) · planned_session_id? → planned_session (UNIQUE)
-                  · CHECK (au moins un des deux) · feeling 1-5 · rpe 1-10 · comment text · pain_note · created_at · updated_at
-daily_checkin     (user_id, date) PK · fatigue 1-5 · sleep_quality 1-5 · soreness 1-5 · motivation 1-5 · pain_note
+                  · CHECK (au moins un des deux) · feeling 1-5 · rpe 1-10 · pain 1-5 (douleur Achille, D33)
+                  · comment text · pain_note · created_at · updated_at
+daily_checkin     (user_id, date) PK · fatigue 1-5 · sleep_quality 1-5 · pain 1-5 (douleur Achille ; ex-soreness, P2-M6)
+                  · motivation 1-5 · note (ex-pain_note, P2-M6)
 ```
 
 Relations : plan 1→n plan_phase 1→n planned_session ; planned_session 1→0..n activity (via session_link, ex. double footing) ; activity 1→0..1 journal_entry ; une séance prévue **non faite** peut aussi avoir un journal (raison de l'écart, D08/D20).

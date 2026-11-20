@@ -7,7 +7,7 @@ import { todayInParis } from "@/lib/dates";
 import { formatClock, formatDate, formatDistance, formatPacePerKm } from "@/lib/format";
 import { phaseProgress, planPositionPct, currentWeek } from "@/planner/calendar";
 import { eventsView, type EventView } from "@/planner/events";
-import { TOTAL_WEEKS } from "@/planner/plan";
+import { PHASES, TOTAL_WEEKS } from "@/planner/plan";
 
 /** Contenu de /echeances ; aussi affiché derrière le panneau d'ajout sur PC. */
 export async function EventsView() {
@@ -36,7 +36,7 @@ export async function EventsView() {
               { label: "Aujourd'hui", pct: planPositionPct(planStart, today), kind: "today" as const },
               ...upcoming.map((e) => ({ label: e.name, pct: planPositionPct(planStart, e.date), kind: e.isTarget ? ("target" as const) : ("event" as const) })),
             ]}
-            ariaLabel={`Plan en 4 phases, semaine ${week} sur ${TOTAL_WEEKS}, et ses échéances`}
+            ariaLabel={`Plan en ${PHASES.length} phases, semaine ${week} sur ${TOTAL_WEEKS}, et ses échéances`}
           />
         </Card>
       </div>

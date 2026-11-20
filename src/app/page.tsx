@@ -13,7 +13,7 @@ import { WeekChart } from "@/components/ui/week-chart";
 import { WEEK_STATUS_CHIP } from "@/components/ui/week-status";
 import { getActivities, getFormDemo, getLatestCheckin, getPlanStart, getRace, getSessions, getWellness } from "@/db/repository";
 import { barHeightsPct, niceScaleMax } from "@/engine/chart";
-import { easyRunFocus } from "@/engine/endurance";
+import { EASY_FOCUS_DAYS, easyRunFocus } from "@/engine/endurance";
 import { cappedPct, planProgressPct } from "@/engine/progress";
 import { latestWellness } from "@/engine/wellness";
 import { addDays, splitWeeksDays, todayInParis } from "@/lib/dates";
@@ -212,7 +212,7 @@ async function Today() {
 
           <div className="lg:order-last lg:col-span-2">
             <Card label="Focus endurance">
-              <p className="text-body-sm text-text-muted">Footings des 14 derniers jours</p>
+              <p className="text-body-sm text-text-muted">Footings des {EASY_FOCUS_DAYS} derniers jours</p>
               {easy.count === 0 ? (
                 <p className="mt-2.5 text-body text-text-muted">Aucun footing réalisé sur la période.</p>
               ) : (

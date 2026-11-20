@@ -11,8 +11,11 @@ export interface EasyRunFocus {
   hrZoneMax?: number; // haut de la zone de FC du premier footing de la période
 }
 
+/** Fenêtre du Focus endurance, en jours. */
+export const EASY_FOCUS_DAYS = 14;
+
 /** Footings (EF, récup) réalisés entre `today - days` et `today`. */
-export function easyRunFocus(sessions: Session[], today: string, days = 14): EasyRunFocus {
+export function easyRunFocus(sessions: Session[], today: string, days = EASY_FOCUS_DAYS): EasyRunFocus {
   const since = addDays(today, -days);
   const easy = sessions.filter((s) => s.status === "done" && (s.type === "ef" || s.type === "recup") && s.date >= since);
   const gap = easy.length

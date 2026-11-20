@@ -9,7 +9,7 @@ import { getActivities, getPlanStart, getSessions } from "@/db/repository";
 import { todayInParis } from "@/lib/dates";
 import { formatDistanceParts } from "@/lib/format";
 import { phaseProgress } from "@/planner/calendar";
-import { TOTAL_WEEKS } from "@/planner/plan";
+import { PHASES, TOTAL_WEEKS } from "@/planner/plan";
 import { planView, splitCurrentPhase, weeksTotal, type PlanPhase } from "@/planner/plan-view";
 import { WeekCard, WeekRow } from "./weeks";
 
@@ -39,7 +39,7 @@ async function Plan() {
       <header className="flex flex-col gap-1 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
         <div>
           <h1 className="font-display text-title-lg text-text">Plan</h1>
-          <p className="text-body text-text-muted">{TOTAL_WEEKS} semaines en 4 phases, jusqu&apos;au jour J.</p>
+          <p className="text-body text-text-muted">{TOTAL_WEEKS} semaines en {PHASES.length} phases, jusqu&apos;au jour J.</p>
         </div>
         <ButtonLink href="#semaine-en-cours" variant="secondary" className="max-lg:hidden">
           Aller à aujourd&apos;hui
@@ -49,7 +49,7 @@ async function Plan() {
       <Card>
         <PhaseTimeline
           phases={phases.map((p) => ({ name: p.name, weeks: p.weeks, state: p.state, progressPct: p.progressPct }))}
-          ariaLabel={`Plan en 4 phases, semaine ${view.currentWeek} sur ${TOTAL_WEEKS}`}
+          ariaLabel={`Plan en ${PHASES.length} phases, semaine ${view.currentWeek} sur ${TOTAL_WEEKS}`}
         />
       </Card>
 

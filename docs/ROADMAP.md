@@ -30,7 +30,7 @@ Marathon : Annecy, avril 2027 (date à confirmer). Départ à l'EPFL : 16 févri
 
 Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 
-## Phase 2 — Utile (mi-déc.)
+## Phase 2 — Utile (mi-déc.) ✅ terminée le 2026-11-20
 - [x] `npm run db:backup` + `db:seed --mock` (D22, D23)
 - [x] Connexion automatique en local, `/login` masqué (D26)
 - [x] P2-M1 — Valeurs justes : réalisé hebdo, doubles sorties, liaison ± 1 jour, marche exclue (D28)
@@ -44,7 +44,7 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 - [x] P2-M6 — Journal : questionnaire du matin + saisie après séance, aussi pour une séance non faite (D20, D33)
 - [x] P2-M7 — Plan : calendrier prévu / réalisé / écarts
 - [x] P2-M8 — Échéances + saisie manuelle d'une sortie (D18, D33)
-- [ ] P2-M9 — Nettoyage du prototype (D25) et contrôle de fin de phase
+- [x] P2-M9 — Nettoyage du prototype (D25) et contrôle de fin de phase
 
 ## Phase 3 — Intelligence (janv.)
 - [ ] `SCIENCE.md` : formules et sources
