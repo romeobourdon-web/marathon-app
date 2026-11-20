@@ -14,7 +14,7 @@ export type JournalRow = Pick<Tables<"journal_entry">, "feeling" | "rpe" | "comm
 
 export type LinkedActivityRow = Pick<
   Tables<"activity">,
-  "source" | "start_time" | "distance_m" | "moving_time_s" | "avg_hr" | "avg_speed_mps"
+  "id" | "source" | "start_time" | "distance_m" | "moving_time_s" | "avg_hr" | "avg_speed_mps"
 > & {
   // Relation 1–1 (activity_id UNIQUE) : PostgREST renvoie un objet, ou null.
   journal_entry: JournalRow | JournalRow[] | null;
@@ -81,7 +81,7 @@ export function toActivityResult(r: PlannedSessionRow, options: { ignoreMock?: b
   const actual = combineActivities(runs);
   if (!actual) return { skipped: true };
   const journal = activities.map((a) => toJournal(a.journal_entry)).find((j) => j !== undefined);
-  return { skipped: false, actual, journal };
+  return { skipped: false, actual, journal, activityIds: activities.map((a) => a.id) };
 }
 
 export type ActivityRow = Pick<

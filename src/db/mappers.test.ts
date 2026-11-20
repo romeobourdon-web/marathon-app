@@ -49,6 +49,7 @@ describe("toActivityResult", () => {
       session_link: [
         {
           activity: {
+            id: "a1",
             source: "garmin",
             start_time: "2026-10-06T07:00:00+00:00",
             distance_m: 8_400,
@@ -64,11 +65,13 @@ describe("toActivityResult", () => {
       skipped: false,
       actual: { distanceKm: 8.4, durationSec: 2_772, avgPace: 330, avgHr: 139 },
       journal: { feeling: 4, rpe: 4, note: "Bonnes jambes." },
+      activityIds: ["a1"],
     });
   });
 
   it("agrège une séance faite en plusieurs activités (D28) et tolère un journal absent", () => {
     const activity = (start: string, d: number, pace: number, hr: number, time: number) => ({
+      id: start.slice(11, 16),
       source: "garmin",
       start_time: start,
       distance_m: d,
@@ -84,7 +87,7 @@ describe("toActivityResult", () => {
         { activity: activity("2026-10-25T15:15:00+00:00", 1_970, 284, 136, 561) },
       ],
     });
-    expect(r).toEqual({ skipped: false, actual: { distanceKm: 9.77, durationSec: 2_761, avgPace: 282, avgHr: 150 }, journal: undefined });
+    expect(r).toEqual({ skipped: false, actual: { distanceKm: 9.77, durationSec: 2_761, avgPace: 282, avgHr: 150 }, journal: undefined, activityIds: ["15:15", "16:29"] });
   });
 
   it("ignore le réalisé fictif quand de vraies activités existent", () => {
@@ -93,6 +96,7 @@ describe("toActivityResult", () => {
       session_link: [
         {
           activity: {
+            id: "m1",
             source: "mock",
             start_time: "2026-10-06T07:00:00+00:00",
             distance_m: 8_000,

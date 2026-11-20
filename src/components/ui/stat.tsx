@@ -41,7 +41,7 @@ export function Stat({ label, value, unit, verdict, variant = "default", accent 
   if (variant === "compare") {
     return (
       <div className="flex min-w-0 flex-col gap-0.5">
-        <dt className="text-caption font-bold tracking-wider text-text-subtle uppercase">{label}</dt>
+        <dt className="text-micro text-text-subtle uppercase">{label}</dt>
         <dd className={`font-display text-title-sm tabular-nums ${delta ? "text-accent-ink" : "text-text"}`}>
           {value}
           {unit && <span className="ml-0.5 text-body-sm font-semibold text-text-subtle">{unit}</span>}

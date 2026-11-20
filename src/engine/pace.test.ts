@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { paceFromSpeed, paceGap, targetPace } from "@/engine/pace";
+import { paceFromSpeed, paceGap, rangeGap, targetPace } from "@/engine/pace";
 
 describe("paceGap", () => {
   const target = { min: 345, max: 370 };
@@ -32,5 +32,12 @@ describe("paceFromSpeed", () => {
 describe("targetPace", () => {
   it("donne l'allure à tenir pour un temps visé (arrondi inférieur)", () => {
     expect(targetPace(3 * 3600 + 30 * 60, 42_195)).toBe(298);
+  });
+});
+
+describe("rangeGap", () => {
+  it("FC : 0 dans la zone, sinon l'écart à la borne", () => {
+    expect(rangeGap(146, { min: 128, max: 142 })).toBe(4);
+    expect(rangeGap(135, { min: 128, max: 142 })).toBe(0);
   });
 });

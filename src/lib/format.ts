@@ -186,3 +186,20 @@ export function formatOffPlanNote(items: { sport: string; distanceKm: number }[]
   const plural = items.length > 1;
   return `+ ${items.length} activité${plural ? "s" : ""} hors plan (${list}), non comptée${plural ? "s" : ""}.`;
 }
+
+const dayMonth = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" });
+
+/** ("2026-11-09", "2026-11-15") → "9–15 nov." ; ("2026-09-28", "2026-10-04") → "28 sept.–4 oct." */
+export function formatDateRange(from: string, to: string): string {
+  const a = new Date(`${from}T00:00:00Z`);
+  const b = new Date(`${to}T00:00:00Z`);
+  if (a.getUTCMonth() === b.getUTCMonth()) return `${a.getUTCDate()}–${dayMonth.format(b)}`;
+  return `${dayMonth.format(a)}–${dayMonth.format(b)}`;
+}
+
+const FEELING_WORDS = ["Épuisé", "Difficile", "Correct", "Bien", "Excellent"];
+
+/** Ressenti 1–5 → mot (« 4 » → « Bien ») ; hors échelle → chaîne vide. */
+export function formatFeeling(feeling: number): string {
+  return FEELING_WORDS[feeling - 1] ?? "";
+}

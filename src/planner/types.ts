@@ -47,4 +47,6 @@ export interface Session extends PlannedSession {
   status: SessionStatus;
   actual?: CompletedRun;
   journal?: JournalEntry;
+  /** Activités liées (D28 : plusieurs possibles), par ordre de départ. */
+  activityIds?: string[];
 }

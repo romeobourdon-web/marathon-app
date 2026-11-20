@@ -13,7 +13,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   ghost: "min-h-(--touch-min) px-2 text-accent-ink hover:underline",
   // Filtres (v2.1) : état porté par aria-pressed ; actif = fond text.
   toggle:
-    "min-h-(--touch-min) px-4 text-body-sm font-bold border-(length:--border-hairline) border-line bg-surface text-text-muted aria-pressed:border-text aria-pressed:bg-text aria-pressed:text-surface",
+    "min-h-(--touch-min) px-4 text-body-sm font-bold border-(length:--border-hairline) border-line bg-surface text-text-muted aria-pressed:border-text aria-pressed:bg-text aria-pressed:text-surface aria-[current=page]:border-text aria-[current=page]:bg-text aria-[current=page]:text-surface",
 };
 
 const DISABLED = "disabled:cursor-not-allowed disabled:border-transparent disabled:bg-surface-raised disabled:text-text-subtle";
@@ -41,12 +41,20 @@ export function Button({ variant = "primary", pressed, block = false, className 
   );
 }
 
-type ButtonLinkProps = { href: string; variant?: Exclude<ButtonVariant, "toggle">; block?: boolean; children: ReactNode; className?: string };
+type ButtonLinkProps = {
+  href: string;
+  variant?: ButtonVariant;
+  /** toggle : filtre actif, porté par aria-current (lien de filtre dans l'URL). */
+  current?: boolean;
+  block?: boolean;
+  children: ReactNode;
+  className?: string;
+};
 
 /** Même apparence que Button, pour une navigation (vrai lien <a>). */
-export function ButtonLink({ href, variant = "primary", block = false, children, className = "" }: ButtonLinkProps) {
+export function ButtonLink({ href, variant = "primary", current, block = false, children, className = "" }: ButtonLinkProps) {
   return (
-    <Link href={href} className={`${BASE} ${VARIANTS[variant]} ${block ? "w-full lg:w-auto" : ""} ${className}`}>
+    <Link href={href} aria-current={current ? "page" : undefined} className={`${BASE} ${VARIANTS[variant]} ${block ? "w-full lg:w-auto" : ""} ${className}`}>
       {children}
     </Link>
   );

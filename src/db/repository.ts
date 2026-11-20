@@ -43,7 +43,7 @@ const SESSION_SELECT = `
   id, date, week, type, title, details, distance_m, pace_min_s_km, pace_max_s_km, hr_min, hr_max,
   plan_phase (code),
   session_link (
-    activity (source, start_time, distance_m, moving_time_s, avg_hr, avg_speed_mps, journal_entry (feeling, rpe, comment))
+    activity (id, source, start_time, distance_m, moving_time_s, avg_hr, avg_speed_mps, journal_entry (feeling, rpe, comment))
   )
 `;
 
@@ -83,6 +83,43 @@ export async function getActivities(): Promise<ActivityRecord[]> {
   if (error || !data) fail("activités", error);
   const real = data.filter((a) => a.source !== "mock");
   return (real.length > 0 ? real : data).map(toActivityRecord);
+}
+
+export interface ActivityDetail {
+  activity: ActivityRecord;
+  source: string;
+  elevationGainM: number | null;
+  journal: { feeling: number | null; rpe: number | null; comment: string | null; painNote: string | null } | null;
+  /** Séries temporelles sans GPS (D19 : le GPS reste en base, il n'est pas lu ici) ; null sans séries (import téléphone). */
+  stream: { timeS: number[]; distanceM: (number | null)[]; hr: (number | null)[]; cadence: (number | null)[] } | null;
+}
+
+/** Une activité, ses séries (allure, FC, cadence) et son journal ; null si elle n'existe pas (ou pas à cet utilisateur). */
+export async function getActivityDetail(id: string): Promise<ActivityDetail | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("activity")
+    .select(
+      "id, source, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, elevation_gain_m, journal_entry (feeling, rpe, comment, pain_note), activity_stream (time_s, distance_m, hr, cadence)",
+    )
+    .eq("id", id)
+    .maybeSingle();
+  if (error) fail("activité", error);
+  if (!data) return null;
+  const journal = asList(data.journal_entry)[0] ?? null;
+  const stream = asList(data.activity_stream)[0] ?? null;
+  return {
+    activity: toActivityRecord(data),
+    source: data.source,
+    elevationGainM: data.elevation_gain_m,
+    journal: journal && { feeling: journal.feeling, rpe: journal.rpe, comment: journal.comment, painNote: journal.pain_note },
+    stream: stream && {
+      timeS: stream.time_s,
+      distanceM: stream.distance_m ?? [],
+      hr: stream.hr ?? [],
+      cadence: stream.cadence ?? [],
+    },
+  };
 }
 
 /** Bien-être (VFC, FC de repos, sommeil) entre deux dates incluses. */

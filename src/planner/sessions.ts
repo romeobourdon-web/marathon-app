@@ -16,7 +16,7 @@ export function linkSessions(
 ): Session[] {
   return planned.map((s) => {
     const result = activityFor(s);
-    if (!result.skipped) return { ...s, status: "done", actual: result.actual, journal: result.journal };
+    if (!result.skipped) return { ...s, status: "done", actual: result.actual, journal: result.journal, activityIds: result.activityIds };
     if (s.date < today) return { ...s, status: "skipped" };
     if (s.date === today) return { ...s, status: "today" };
     return { ...s, status: "upcoming" };

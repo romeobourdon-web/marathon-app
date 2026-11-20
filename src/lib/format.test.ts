@@ -14,6 +14,8 @@ import {
   formatRelativeDay,
   formatDayInitial,
   formatOffPlanNote,
+  formatDateRange,
+  formatFeeling,
 } from "./format";
 
 const NBSP = " ";
@@ -126,5 +128,19 @@ describe("Aujourd'hui : jour relatif, initiale, hors plan", () => {
     expect(formatOffPlanNote([{ sport: "cycling", distanceKm: 25 }, { sport: "walking", distanceKm: 5.1 }])).toBe(
       "+ 2 activités hors plan (vélo, 25,0\u00a0km ; marche, 5,1\u00a0km), non comptées.",
     );
+  });
+});
+
+describe("formatDateRange", () => {
+  it("même mois ou deux mois", () => {
+    expect(formatDateRange("2026-11-09", "2026-11-15")).toBe("9–15 nov.");
+    expect(formatDateRange("2026-09-28", "2026-10-04")).toBe("28 sept.–4 oct.");
+  });
+});
+
+describe("formatFeeling", () => {
+  it("mot du ressenti", () => {
+    expect(formatFeeling(4)).toBe("Bien");
+    expect(formatFeeling(9)).toBe("");
   });
 });

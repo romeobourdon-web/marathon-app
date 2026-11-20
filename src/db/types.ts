@@ -39,4 +39,4 @@ export interface Race {
 /** Ce que la source d'activités renvoie pour une séance passée. */
 export type ActivityResult =
   | { skipped: true }
-  | { skipped: false; actual: CompletedRun; journal?: JournalEntry }; // journal absent tant qu'il n'est pas écrit
+  | { skipped: false; actual: CompletedRun; journal?: JournalEntry; activityIds?: string[] }; // journal absent tant qu'il n'est pas écrit

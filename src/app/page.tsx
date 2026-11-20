@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { AppNav } from "@/components/ui/app-nav";
 import { Card } from "@/components/ui/card";
-import { Chip, DemoChip, type ChipVariant } from "@/components/ui/chip";
+import { Chip, DemoChip } from "@/components/ui/chip";
+import { SESSION_TYPE_TONE } from "@/components/ui/session-type";
 import { ScoreCard } from "@/components/ui/score-card";
 import { SessionCard } from "@/components/ui/session-card";
 import { Stat } from "@/components/ui/stat";
@@ -35,7 +36,6 @@ import { currentWeek, daysToRace } from "@/planner/calendar";
 import { TOTAL_WEEKS, TYPE_LABELS } from "@/planner/plan";
 import { volumeTrend, weekSummary } from "@/planner/summary";
 import { dayFocus, offPlanActivities, weekDays } from "@/planner/today";
-import type { SessionType } from "@/planner/types";
 
 const NBSP = " ";
 /** Pas de la grille du graphique de volume (km). */
@@ -47,15 +47,6 @@ const WEEK_STATUS: Record<WeekStatus, { word: string; tone: Extract<Tone, "good"
   retard: { word: "En retard", tone: "warn" },
 };
 
-const TYPE_TONE: Record<SessionType, Extract<ChipVariant, "neutral" | "quality" | "long">> = {
-  ef: "neutral",
-  recup: "neutral",
-  fractionne: "quality",
-  seuil: "quality",
-  allure: "quality",
-  course: "quality",
-  "sortie-longue": "long",
-};
 
 const DAY_WORD = { done: "faite", skipped: "non réalisée", planned: "prévue", rest: "repos" } as const;
 
@@ -149,7 +140,7 @@ async function Today() {
                 label={focus.kind === "today" ? "Séance du jour" : "Prochaine séance"}
                 when={focus.kind === "next" ? formatRelativeDay(focus.session.date, today) : undefined}
                 title={focus.session.title}
-                type={{ label: TYPE_LABELS[focus.session.type], tone: TYPE_TONE[focus.session.type] }}
+                type={{ label: TYPE_LABELS[focus.session.type], tone: SESSION_TYPE_TONE[focus.session.type] }}
                 details={focus.session.details}
                 instructions={[]}
                 distance={formatDistanceParts(focus.session.distanceKm * 1000, 0)}

@@ -199,9 +199,15 @@
   --text-nav: 11px;
   --text-nav--line-height: 14px;
   --text-nav--font-weight: 600;
+  /* v2.2 : libellés de Stat compare, en-têtes de tableau, axes (en capitales, +0,06em) */
+  --text-micro: 11px;
+  --text-micro--line-height: 14px;
+  --text-micro--letter-spacing: 0.06em;
+  --text-micro--font-weight: 700;
 
   /* Rayons */
   --radius-sm: 4px;
+  --radius-ctl: 12px; /* v2.2 : segments d'échelle, logo, info-bulles des barres */
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-pill: 999px;
