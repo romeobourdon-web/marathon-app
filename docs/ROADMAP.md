@@ -41,7 +41,7 @@ Prompts prêts à l'emploi : `docs/missions/phase-1.md`.
 - [x] P2-M3c — Données complètes : synchro sur 14 jours, activités hors course visibles (D31), import des sorties au téléphone (D32)
 - [x] P2-M4 — Écran Aujourd'hui en v2.1, téléphone et PC (D25)
 - [x] P2-M5 — Séances + détail d'une séance en v2.1 (remplace « Historique des activités + détail »)
-- [ ] P2-M6 — Journal : questionnaire du matin + saisie après séance, aussi pour une séance non faite (D20, D33)
+- [x] P2-M6 — Journal : questionnaire du matin + saisie après séance, aussi pour une séance non faite (D20, D33)
 - [ ] P2-M7 — Plan : calendrier prévu / réalisé / écarts
 - [ ] P2-M8 — Échéances + saisie manuelle d'une sortie (D18, D33)
 - [ ] P2-M9 — Nettoyage du prototype (D25) et contrôle de fin de phase
