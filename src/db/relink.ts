@@ -1,4 +1,4 @@
-// Recalcul des liaisons automatiques prévu ↔ réalisé (D28 à D30), partagé par la synchro et l'import téléphone.
+// Recalcul des liaisons automatiques prévu ↔ réalisé (D28 à D30), partagé par la synchro, l'import téléphone et la saisie manuelle (client admin : côté serveur uniquement).
 // Le jour même d'abord, sinon une séance libre à ± 1 jour de la même semaine si l'activité fait ≥ 50 % du prévu.
 // Seules les courses qui comptent pour le plan sont liées. Les liaisons manuelles ne sont jamais modifiées.
 import { deleteLinks, getLinkState, linkSession } from "@/db/repository";

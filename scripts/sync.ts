@@ -6,7 +6,7 @@
  * Ouvre une entrée sync_run, récupère activités (toutes, avec leur sport), séries FIT des nouvelles
  * activités et bien-être, fait les upserts via le repository (aucun doublon : clés uniques ; les activités
  * existantes sont mises à jour, ex. un sport corrigé dans Garmin Connect, D31),
- * recalcule les liaisons automatiques (scripts/relink), puis ferme sync_run (succès ou erreur).
+ * recalcule les liaisons automatiques (db/relink), puis ferme sync_run (succès ou erreur).
  * Pas de logique métier ici : le script orchestre connectors/, db/repository et engine/.
  */
 import { createGarminSource } from "@/connectors/garmin";
@@ -25,7 +25,7 @@ import {
 import { toActivityInput } from "@/db/mappers";
 import { PROJECT_START } from "@/db/seed/reference";
 import { addDays, todayInParis } from "@/lib/dates";
-import { relink } from "./relink";
+import { relink } from "@/db/relink";
 
 function parseFrom(argv: string[]): string {
   const i = argv.indexOf("--from");

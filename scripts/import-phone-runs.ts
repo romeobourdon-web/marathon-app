@@ -11,7 +11,7 @@ import { toActivityInput } from "@/db/mappers";
 import { finishSyncRun, getActivityStarts, getUserIdByEmail, startSyncRun, upsertActivities } from "@/db/repository";
 import { isSameRun } from "@/engine/activity";
 import { formatDistance } from "@/lib/format";
-import { relink } from "./relink";
+import { relink } from "@/db/relink";
 
 const FILE = "data/imports/strava-phone-runs.json";
 

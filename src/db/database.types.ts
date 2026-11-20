@@ -75,17 +75,23 @@ isOneToOne: false
                   ]
                 },"event": {
                   Row: {
-                    "date": string,"distance_m": number,"id": string,"name": string,"priority": string,"target_time_s": number | null,"user_id": string
+                    "activity_id": string | null,"date": string,"distance_m": number,"id": string,"kind": string,"name": string,"priority": string,"target_time_s": number | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "date": string,"distance_m": number,"id"?: string,"name": string,"priority"?: string,"target_time_s"?: number | null,"user_id"?: string
+                    "activity_id"?: string | null,"date": string,"distance_m": number,"id"?: string,"kind"?: string,"name": string,"priority"?: string,"target_time_s"?: number | null,"user_id"?: string
                   }
                   Update: {
-                    "date"?: string,"distance_m"?: number,"id"?: string,"name"?: string,"priority"?: string,"target_time_s"?: number | null,"user_id"?: string
+                    "activity_id"?: string | null,"date"?: string,"distance_m"?: number,"id"?: string,"kind"?: string,"name"?: string,"priority"?: string,"target_time_s"?: number | null,"user_id"?: string
                   }
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "event_activity_id_fkey"
+      columns: ["activity_id"]
+isOneToOne: false
+      referencedRelation: "activity"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"journal_entry": {
                   Row: {

@@ -4,13 +4,15 @@
 // Le plan a été généré par planner/buildPlan puis inséré par le seed : la base fait foi (D11).
 
 import type { TablesInsert } from "@/db/database.types";
-import { toActivityRecord, toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
+import type { NeutralActivity } from "@/connectors/types";
+import { toActivityInput, toActivityRecord, toActivityResult, toPlannedSession, toRace, type PlannedSessionRow } from "@/db/mappers";
 import { DESIGN_PREVIEW } from "@/db/seed/mock/design";
 import { FORM_DEMO } from "@/db/seed/mock/form";
 import { createSupabaseAdminClient } from "@/db/supabase/admin";
 import { createSupabaseServerClient } from "@/db/supabase/server";
 import type { ActivityRecord, Race } from "@/db/types";
 import type { WellnessDay } from "@/engine/wellness";
+import type { EventRecord } from "@/planner/events";
 import { linkSessions } from "@/planner/sessions";
 import type { Session } from "@/planner/types";
 
@@ -161,7 +163,60 @@ export async function getRecentJournal(limit = 30): Promise<RecentJournalEntry[]
   return entries.sort((x, y) => dateOf(y).localeCompare(dateOf(x)));
 }
 
+/** Échéances (courses, tests) avec le résultat de l'activité liée ; course objectif marquée. */
+export async function getEvents(): Promise<EventRecord[]> {
+  const supabase = await createSupabaseServerClient();
+  const [events, profile] = await Promise.all([
+    supabase.from("event").select("id, name, date, distance_m, target_time_s, kind, activity (moving_time_s)").order("date"),
+    supabase.from("athlete_profile").select("goal_event_id").maybeSingle(),
+  ]);
+  if (events.error) fail("échéances", events.error);
+  return events.data.map((e) => {
+    const a = asList(e.activity)[0] ?? null;
+    return {
+      id: e.id,
+      name: e.name,
+      date: e.date,
+      distanceKm: e.distance_m / 1000,
+      targetTimeSec: e.target_time_s,
+      kind: e.kind as EventRecord["kind"],
+      isTarget: e.id === profile.data?.goal_event_id,
+      result: a?.moving_time_s ? { durationSec: a.moving_time_s } : null,
+    };
+  });
+}
+
+/** Identifiant de l'utilisateur connecté (pour le recalcul des liaisons après une saisie). */
+export async function getCurrentUserId(): Promise<string> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) fail("utilisateur connecté", error);
+  return data.user.id;
+}
+
 // ── Écritures depuis les écrans (session de l'utilisateur, RLS) ─────────────
+
+/** Ajoute une échéance (course ou test, D33). */
+export async function addEvent(e: { name: string; date: string; distanceKm: number; targetTimeSec: number | null; kind: "race" | "test" }): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.from("event").insert({
+    name: e.name,
+    date: e.date,
+    distance_m: Math.round(e.distanceKm * 1000),
+    target_time_s: e.targetTimeSec,
+    kind: e.kind,
+    priority: "B",
+  });
+  if (error) throw new Error(`Écriture impossible (échéance) : ${error.message}`);
+}
+
+/** Ajoute une sortie saisie à la main (source = 'manual', D18). Renvoie son id. */
+export async function addManualActivity(a: NeutralActivity): Promise<string> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("activity").insert(toActivityInput("manual", a)).select("id").single();
+  if (error) throw new Error(`Écriture impossible (sortie) : ${error.message}`);
+  return data.id;
+}
 
 /** Enregistre (ou remplace) le questionnaire du matin d'une date. */
 export async function saveCheckin(c: Checkin): Promise<void> {
