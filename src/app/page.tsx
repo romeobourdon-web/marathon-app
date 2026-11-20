@@ -8,14 +8,13 @@ import { ScoreCard } from "@/components/ui/score-card";
 import { SessionCard } from "@/components/ui/session-card";
 import { Stat } from "@/components/ui/stat";
 import { StatusBand } from "@/components/ui/status-band";
-import type { Tone } from "@/components/ui/tone";
 import { TrendChart } from "@/components/ui/trend-chart";
 import { WeekChart } from "@/components/ui/week-chart";
+import { WEEK_STATUS_CHIP } from "@/components/ui/week-status";
 import { getActivities, getFormDemo, getLatestCheckin, getPlanStart, getRace, getSessions, getWellness } from "@/db/repository";
 import { barHeightsPct, niceScaleMax } from "@/engine/chart";
 import { easyRunFocus } from "@/engine/endurance";
 import { cappedPct, planProgressPct } from "@/engine/progress";
-import type { WeekStatus } from "@/engine/week-status";
 import { latestWellness } from "@/engine/wellness";
 import { addDays, splitWeeksDays, todayInParis } from "@/lib/dates";
 import {
@@ -41,11 +40,6 @@ const NBSP = " ";
 /** Pas de la grille du graphique de volume (km). */
 const VOLUME_GRID_STEP_KM = 20;
 
-const WEEK_STATUS: Record<WeekStatus, { word: string; tone: Extract<Tone, "good" | "info" | "warn"> }> = {
-  ok: { word: "Dans les clous", tone: "good" },
-  avance: { word: "En avance", tone: "info" },
-  retard: { word: "En retard", tone: "warn" },
-};
 
 
 const DAY_WORD = { done: "faite", skipped: "non réalisée", planned: "prévue", rest: "repos" } as const;
@@ -89,7 +83,7 @@ async function Today() {
   // Cette semaine
   const days7 = weekDays(summary.start, summary.sessions, today);
   const offPlan = offPlanActivities(activities, planStart, summary.start, addDays(summary.start, 6));
-  const weekStatus = WEEK_STATUS[summary.status];
+  const weekStatus = WEEK_STATUS_CHIP[summary.status];
 
   // Focus endurance
   const easy = easyRunFocus(sessions, today);
@@ -185,7 +179,7 @@ async function Today() {
             <Card
               label="Cette semaine"
               badge={
-                <Chip tone={weekStatus.tone} glyph={weekStatus.tone === "good" ? "✓" : undefined}>
+                <Chip tone={weekStatus.tone}>
                   {weekStatus.word}
                 </Chip>
               }

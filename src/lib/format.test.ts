@@ -16,6 +16,7 @@ import {
   formatOffPlanNote,
   formatDateRange,
   formatFeeling,
+  formatWeekday,
 } from "./format";
 
 const NBSP = " ";
@@ -142,5 +143,11 @@ describe("formatFeeling", () => {
   it("mot du ressenti", () => {
     expect(formatFeeling(4)).toBe("Bien");
     expect(formatFeeling(9)).toBe("");
+  });
+});
+
+describe("formatWeekday", () => {
+  it("jour court", () => {
+    expect(formatWeekday("2026-11-17")).toBe("mar.");
   });
 });

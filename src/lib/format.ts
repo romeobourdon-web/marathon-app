@@ -203,3 +203,8 @@ const FEELING_WORDS = ["Épuisé", "Difficile", "Correct", "Bien", "Excellent"];
 export function formatFeeling(feeling: number): string {
   return FEELING_WORDS[feeling - 1] ?? "";
 }
+
+/** "2026-11-17" → "mar." (jour court, lignes de séance du Plan) */
+export function formatWeekday(isoDate: string): string {
+  return formatDate(isoDate).split(" ")[0];
+}

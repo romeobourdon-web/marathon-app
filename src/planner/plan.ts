@@ -180,6 +180,11 @@ export function buildPlan(params: PlanParams): PlannedSession[] {
 export const TOTAL_WEEKS = WEEKS.length;
 
 /** Lundi de la semaine `week` du plan. */
+/** Semaine allégée (récupération) d'après le gabarit du plan. */
+export function isLightWeek(week: number): boolean {
+  return WEEKS[week - 1]?.[2] ?? false;
+}
+
 export function weekStart(planStart: string, week: number): string {
   return addDays(planStart, (week - 1) * 7);
 }
