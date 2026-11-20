@@ -61,14 +61,14 @@ isOneToOne: false
                   ]
                 },"daily_checkin": {
                   Row: {
-                    "created_at": string,"date": string,"fatigue": number | null,"motivation": number | null,"pain_note": string | null,"sleep_quality": number | null,"soreness": number | null,"user_id": string
+                    "created_at": string,"date": string,"fatigue": number | null,"motivation": number | null,"note": string | null,"pain": number | null,"sleep_quality": number | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"date": string,"fatigue"?: number | null,"motivation"?: number | null,"pain_note"?: string | null,"sleep_quality"?: number | null,"soreness"?: number | null,"user_id"?: string
+                    "created_at"?: string,"date": string,"fatigue"?: number | null,"motivation"?: number | null,"note"?: string | null,"pain"?: number | null,"sleep_quality"?: number | null,"user_id"?: string
                   }
                   Update: {
-                    "created_at"?: string,"date"?: string,"fatigue"?: number | null,"motivation"?: number | null,"pain_note"?: string | null,"sleep_quality"?: number | null,"soreness"?: number | null,"user_id"?: string
+                    "created_at"?: string,"date"?: string,"fatigue"?: number | null,"motivation"?: number | null,"note"?: string | null,"pain"?: number | null,"sleep_quality"?: number | null,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -89,14 +89,14 @@ isOneToOne: false
                   ]
                 },"journal_entry": {
                   Row: {
-                    "activity_id": string | null,"comment": string | null,"created_at": string,"feeling": number | null,"id": string,"pain_note": string | null,"planned_session_id": string | null,"rpe": number | null,"updated_at": string,"user_id": string
+                    "activity_id": string | null,"comment": string | null,"created_at": string,"feeling": number | null,"id": string,"pain": number | null,"pain_note": string | null,"planned_session_id": string | null,"rpe": number | null,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "activity_id"?: string | null,"comment"?: string | null,"created_at"?: string,"feeling"?: number | null,"id"?: string,"pain_note"?: string | null,"planned_session_id"?: string | null,"rpe"?: number | null,"updated_at"?: string,"user_id"?: string
+                    "activity_id"?: string | null,"comment"?: string | null,"created_at"?: string,"feeling"?: number | null,"id"?: string,"pain"?: number | null,"pain_note"?: string | null,"planned_session_id"?: string | null,"rpe"?: number | null,"updated_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "activity_id"?: string | null,"comment"?: string | null,"created_at"?: string,"feeling"?: number | null,"id"?: string,"pain_note"?: string | null,"planned_session_id"?: string | null,"rpe"?: number | null,"updated_at"?: string,"user_id"?: string
+                    "activity_id"?: string | null,"comment"?: string | null,"created_at"?: string,"feeling"?: number | null,"id"?: string,"pain"?: number | null,"pain_note"?: string | null,"planned_session_id"?: string | null,"rpe"?: number | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {

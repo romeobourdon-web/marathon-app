@@ -10,7 +10,7 @@ import { Icon } from "@/components/ui/icons";
 import { SESSION_TYPE_TONE } from "@/components/ui/session-type";
 import { Stat } from "@/components/ui/stat";
 import { TrendChart } from "@/components/ui/trend-chart";
-import { getActivityDetail, getPlanStart, getSessions, type ActivityDetail } from "@/db/repository";
+import { getActivityDetail, getJournal, getPlanStart, getSessions, type ActivityDetail, type JournalAnswers } from "@/db/repository";
 import type { CompletedRun } from "@/db/types";
 import { lineGeometry } from "@/engine/chart";
 import { paceGap, rangeGap } from "@/engine/pace";
@@ -84,6 +84,13 @@ async function Detail({ params }: { params: PageProps<"/seances/[id]">["params"]
   const cadence = main?.stream ? avgCadenceSpm(main.stream.cadence) : null;
   const elevation = details.reduce((sum, d) => sum + (d.elevationGainM ?? 0), 0);
   const journal = details.find((d) => d.journal)?.journal ?? null;
+  // Séance non faite : le journal porte la raison de l'écart (D20)
+  const skippedJournal = session?.status === "skipped" ? await getJournal({ sessionId: session.id }) : null;
+  const entryHref = main
+    ? `/journal/saisie?activity=${main.activity.id}&from=/seances/${id}`
+    : session
+      ? `/journal/saisie?session=${session.id}&from=/seances/${id}`
+      : "/journal";
   const pace = session && actual ? paceGap(actual.avgPace, session.targetPace) : 0;
   const hr = session && actual && actual.avgHr > 0 ? rangeGap(actual.avgHr, session.targetHr) : 0;
 
@@ -116,10 +123,18 @@ async function Detail({ params }: { params: PageProps<"/seances/[id]">["params"]
             {session?.status === "skipped" || !actual ? (
               <Card label="Prévu / réalisé" badge={<Chip tone="warn" glyph="✕">Non réalisée</Chip>}>
                 {session && (
-                  <p className="text-body text-text-muted">
-                    Prévu : {formatDistance(session.distanceKm * 1000, 0)} à {formatPaceRangeValue(session.targetPace)} /km, FC {session.targetHr.min}–
-                    {session.targetHr.max}.
-                  </p>
+                  <div className="flex flex-col gap-4">
+                    <p className="text-body text-text-muted">
+                      Prévu : {formatDistance(session.distanceKm * 1000, 0)} à {formatPaceRangeValue(session.targetPace)} /km, FC {session.targetHr.min}–
+                      {session.targetHr.max}.
+                    </p>
+                    {skippedJournal?.comment && (
+                      <blockquote className="rounded-md bg-surface-raised p-3.5 text-body-sm text-text italic">{skippedJournal.comment}</blockquote>
+                    )}
+                    <ButtonLink href={entryHref} variant="secondary" block>
+                      {skippedJournal ? "Modifier la raison de l'écart" : "Expliquer l'écart"}
+                    </ButtonLink>
+                  </div>
                 )}
               </Card>
             ) : (
@@ -163,13 +178,15 @@ async function Detail({ params }: { params: PageProps<"/seances/[id]">["params"]
                 label="Mon ressenti"
                 badge={
                   journal ? (
-                    <Link href="/journal" className="focus-ring rounded-sm text-label text-accent-ink">
+                    <Link href={entryHref} className="focus-ring rounded-sm text-label text-accent-ink">
                       Modifier
                     </Link>
                   ) : undefined
                 }
               >
-                {journal ? <Feeling journal={journal} /> : <ButtonLink href="/journal" variant="secondary" block>Ajouter mon ressenti</ButtonLink>}
+                {journal ? <Feeling journal={journal} /> : <ButtonLink href={entryHref} variant="secondary" block>
+                    Ajouter mon ressenti
+                  </ButtonLink>}
               </Card>
             </div>
           )}
@@ -201,7 +218,7 @@ async function Detail({ params }: { params: PageProps<"/seances/[id]">["params"]
   );
 }
 
-function Feeling({ journal }: { journal: NonNullable<ActivityDetail["journal"]> }) {
+function Feeling({ journal }: { journal: JournalAnswers }) {
   return (
     <div className="flex flex-col gap-4">
       <dl className="grid grid-cols-2 gap-3">
@@ -215,7 +232,7 @@ function Feeling({ journal }: { journal: NonNullable<ActivityDetail["journal"]> 
           ))}
         </div>
       )}
-      {journal.painNote && <p className="text-body-sm text-text-muted">Douleur : {journal.painNote}</p>}
+      {journal.pain && <p className="text-body-sm text-text-muted">Douleur (Achille) : {journal.pain}/5</p>}
       {journal.comment && <blockquote className="rounded-md bg-surface-raised p-3.5 text-body-sm text-text italic">{journal.comment}</blockquote>}
     </div>
   );

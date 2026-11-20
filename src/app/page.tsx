@@ -172,9 +172,12 @@ async function Today() {
                 { label: "VFC", unit: "ms", value: w.hrvMs === null ? "—" : String(Math.round(w.hrvMs)) },
                 { label: "FC repos", value: w.restingHr === null ? "—" : String(w.restingHr) },
                 { label: "sommeil", value: w.sleepS === null ? "—" : formatDurationApprox(w.sleepS) },
-                { label: "douleur", value: freshCheckin?.soreness ? `${freshCheckin.soreness}/5` : "—" },
+                { label: "douleur", value: freshCheckin?.pain ? `${freshCheckin.pain}/5` : "—" },
               ]}
-              questionnaire={{ href: "/journal", label: "Questionnaire du matin · 30 s" }}
+              questionnaire={{
+                href: "/journal/matin",
+                label: checkin?.date === today ? "Modifier le questionnaire du matin" : "Questionnaire du matin · 30 s",
+              }}
             />
           </div>
 

@@ -85,11 +85,113 @@ export async function getActivities(): Promise<ActivityRecord[]> {
   return (real.length > 0 ? real : data).map(toActivityRecord);
 }
 
+/** Réponses d'un journal après séance (D20, D33) : ressenti 1–5, RPE 1–10, douleur Achille 1–5, commentaire. */
+export interface JournalAnswers {
+  feeling: number | null;
+  rpe: number | null;
+  pain: number | null;
+  comment: string | null;
+}
+
+/** Questionnaire du matin (une ligne par jour) : échelles 1–5 et note libre. */
+export interface Checkin {
+  date: string;
+  fatigue: number | null;
+  sleepQuality: number | null;
+  pain: number | null;
+  motivation: number | null;
+  note: string | null;
+}
+
+/** Cible d'un journal : une activité réalisée, ou une séance prévue non faite (raison de l'écart, D20). */
+export type JournalTarget = { activityId: string } | { sessionId: string };
+
+/** Questionnaire du matin d'une date, ou null. */
+export async function getCheckin(date: string): Promise<Checkin | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("daily_checkin").select("date, fatigue, sleep_quality, pain, motivation, note").eq("date", date).maybeSingle();
+  if (error) fail("questionnaire du matin", error);
+  return data && { date: data.date, fatigue: data.fatigue, sleepQuality: data.sleep_quality, pain: data.pain, motivation: data.motivation, note: data.note };
+}
+
+/** Journal d'une activité ou d'une séance, ou null. */
+export async function getJournal(target: JournalTarget): Promise<JournalAnswers | null> {
+  const supabase = await createSupabaseServerClient();
+  const query = supabase.from("journal_entry").select("feeling, rpe, pain, comment");
+  const { data, error } = await ("activityId" in target ? query.eq("activity_id", target.activityId) : query.eq("planned_session_id", target.sessionId)).maybeSingle();
+  if (error) fail("journal", error);
+  return data;
+}
+
+export interface RecentJournalEntry {
+  id: string;
+  answers: JournalAnswers;
+  /** Activité réalisée (et la séance à laquelle elle est liée, s'il y en a une). */
+  activity: (ActivityRecord & { session: { id: string; type: string; title: string } | null }) | null;
+  /** Séance prévue non faite. */
+  session: { id: string; date: string; type: string; title: string; distanceKm: number } | null;
+}
+
+/** Les dernières entrées du journal (activités et séances non faites), les plus récentes d'abord. */
+export async function getRecentJournal(limit = 30): Promise<RecentJournalEntry[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("journal_entry")
+    .select(
+      `id, feeling, rpe, pain, comment, updated_at,
+       activity (id, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, session_link (planned_session (id, type, title))),
+       planned_session (id, date, type, title, distance_m)`,
+    )
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  if (error) fail("journal", error);
+  const entries = data.map((e) => {
+    const a = asList(e.activity)[0] ?? null;
+    const linked = a ? (asList(a.session_link)[0]?.planned_session ?? null) : null;
+    const linkedSession = linked ? asList(linked)[0] ?? null : null;
+    const s = asList(e.planned_session)[0] ?? null;
+    return {
+      id: e.id,
+      answers: { feeling: e.feeling, rpe: e.rpe, pain: e.pain, comment: e.comment },
+      activity: a && { ...toActivityRecord(a), session: linkedSession },
+      session: s && { id: s.id, date: s.date, type: s.type, title: s.title, distanceKm: s.distance_m / 1000 },
+    };
+  });
+  const dateOf = (e: RecentJournalEntry) => e.activity?.startTime ?? e.session?.date ?? "";
+  return entries.sort((x, y) => dateOf(y).localeCompare(dateOf(x)));
+}
+
+// ── Écritures depuis les écrans (session de l'utilisateur, RLS) ─────────────
+
+/** Enregistre (ou remplace) le questionnaire du matin d'une date. */
+export async function saveCheckin(c: Checkin): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.from("daily_checkin").upsert(
+    { date: c.date, fatigue: c.fatigue, sleep_quality: c.sleepQuality, pain: c.pain, motivation: c.motivation, note: c.note },
+    { onConflict: "user_id,date" },
+  );
+  if (error) throw new Error(`Écriture impossible (questionnaire du matin) : ${error.message}`);
+}
+
+/** Enregistre (ou remplace) le journal d'une activité ou d'une séance non faite. */
+export async function saveJournal(target: JournalTarget, answers: JournalAnswers): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  const table = supabase.from("journal_entry");
+  const { error } =
+    "activityId" in target
+      ? await table.upsert({ activity_id: target.activityId, ...answers }, { onConflict: "activity_id" })
+      : await table.upsert({ planned_session_id: target.sessionId, ...answers }, { onConflict: "planned_session_id" });
+  if (error) throw new Error(`Écriture impossible (journal) : ${error.message}`);
+}
+
 export interface ActivityDetail {
   activity: ActivityRecord;
   source: string;
   elevationGainM: number | null;
-  journal: { feeling: number | null; rpe: number | null; comment: string | null; painNote: string | null } | null;
+  journal: JournalAnswers | null;
+  /** Ressenti saisi sur la montre, échelle Garmin (D20) : converti par engine/device-feel. */
+  deviceFeel: number | null;
+  deviceRpe: number | null;
   /** Séries temporelles sans GPS (D19 : le GPS reste en base, il n'est pas lu ici) ; null sans séries (import téléphone). */
   stream: { timeS: number[]; distanceM: (number | null)[]; hr: (number | null)[]; cadence: (number | null)[] } | null;
 }
@@ -100,7 +202,7 @@ export async function getActivityDetail(id: string): Promise<ActivityDetail | nu
   const { data, error } = await supabase
     .from("activity")
     .select(
-      "id, source, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, elevation_gain_m, journal_entry (feeling, rpe, comment, pain_note), activity_stream (time_s, distance_m, hr, cadence)",
+      "id, source, local_date, start_time, sport, distance_m, moving_time_s, avg_hr, avg_speed_mps, elevation_gain_m, device_feel, device_rpe, journal_entry (feeling, rpe, pain, comment), activity_stream (time_s, distance_m, hr, cadence)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -112,7 +214,9 @@ export async function getActivityDetail(id: string): Promise<ActivityDetail | nu
     activity: toActivityRecord(data),
     source: data.source,
     elevationGainM: data.elevation_gain_m,
-    journal: journal && { feeling: journal.feeling, rpe: journal.rpe, comment: journal.comment, painNote: journal.pain_note },
+    journal: journal && { feeling: journal.feeling, rpe: journal.rpe, pain: journal.pain, comment: journal.comment },
+    deviceFeel: data.device_feel,
+    deviceRpe: data.device_rpe,
     stream: stream && {
       timeS: stream.time_s,
       distanceM: stream.distance_m ?? [],
@@ -131,11 +235,11 @@ export async function getWellness(from: string, to: string): Promise<WellnessDay
 }
 
 /** Dernier questionnaire du matin (daily_checkin) daté au plus tard de `today`, ou null. */
-export async function getLatestCheckin(today: string): Promise<{ date: string; soreness: number | null } | null> {
+export async function getLatestCheckin(today: string): Promise<{ date: string; pain: number | null } | null> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("daily_checkin")
-    .select("date, soreness")
+    .select("date, pain")
     .lte("date", today)
     .order("date", { ascending: false })
     .limit(1)
