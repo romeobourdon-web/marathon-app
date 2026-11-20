@@ -22,8 +22,3 @@ export function linkSessions(
     return { ...s, status: "upcoming" };
   });
 }
-
-/** La séance prévue aujourd'hui, sinon la prochaine. */
-export function nextSession(sessions: Session[]): Session | undefined {
-  return sessions.find((s) => s.status === "today" || s.status === "upcoming");
-}

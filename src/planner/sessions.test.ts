@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ActivityResult } from "@/db/types";
-import { linkSessions, nextSession } from "@/planner/sessions";
+import { linkSessions } from "@/planner/sessions";
 import type { PlannedSession } from "@/planner/types";
 
 const planned = (date: string): PlannedSession => ({
@@ -27,9 +27,5 @@ describe("linkSessions", () => {
     const s = linkSessions([planned("2026-11-15")], "2026-11-15", () => done);
     expect(s[0].status).toBe("done");
     expect(s[0].actual?.distanceKm).toBe(14.48);
-  });
-  it("la prochaine séance ignore celle du jour déjà réalisée", () => {
-    const sessions = linkSessions([planned("2026-11-15"), planned("2026-11-17")], "2026-11-15", (p) => (p.date === "2026-11-15" ? done : none));
-    expect(nextSession(sessions)?.date).toBe("2026-11-17");
   });
 });

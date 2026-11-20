@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barHeightsPct, distanceGapM, lineGeometry, niceScaleMax, pairedBarHeightsPct, trendGeometry } from "./chart";
+import { barHeightsPct, distanceGapM, lineGeometry, niceScaleMax } from "./chart";
 
 describe("barHeightsPct", () => {
   it("met à l'échelle de la plus grande valeur", () => {
@@ -14,34 +14,9 @@ describe("barHeightsPct", () => {
   });
 });
 
-describe("trendGeometry", () => {
-  it("place la plus grande valeur en haut et la plus petite en bas, avec la marge", () => {
-    const { points, targetY } = trendGeometry([200, 100], 150);
-    expect(points).toEqual([
-      { x: 0, y: 10 },
-      { x: 100, y: 90 },
-    ]);
-    expect(targetY).toBe(50);
-  });
-  it("inclut la cible dans l'échelle même hors des valeurs", () => {
-    const { points, targetY } = trendGeometry([200, 200], 100, 0);
-    expect(points.every((p) => p.y === 0)).toBe(true);
-    expect(targetY).toBe(100);
-  });
-  it("centre un point unique", () => {
-    expect(trendGeometry([5], 5).points[0].x).toBe(50);
-  });
-});
-
 describe("distanceGapM", () => {
   it("est négatif quand le réalisé est plus court", () => {
     expect(distanceGapM(18_000, 17_400)).toBe(-600);
-  });
-});
-
-describe("pairedBarHeightsPct", () => {
-  it("met prévu et réalisé sur la même échelle", () => {
-    expect(pairedBarHeightsPct([10, 20], [5, 25])).toEqual({ planned: [40, 80], done: [20, 100] });
   });
 });
 

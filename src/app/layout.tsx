@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   description: "Target 42 — pilotage de la préparation marathon (Annecy, avril 2027, objectif sub 3h30).",
 };
 
-// Layout racine : uniquement <html> et <body>. Les écrans du prototype ont leur layout dans (prototype)/.
+// Layout racine : uniquement <html> et <body>. Chaque écran pose sa navigation (AppNav).
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${sans.variable} ${display.variable} h-full antialiased`}>
